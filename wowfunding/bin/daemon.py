@@ -39,10 +39,10 @@ class WowneroDaemon:
         data = self._make_request(data)
         data = data['result'].get('in', [])
         for d in data:
-            d['amount_human'] = float(d['amount'])/1e11
+            d['amount_human'] = float(d['amount'])/1e12
 
         return {
-            'sum': sum([float(z['amount'])/1e11 for z in data]),
+            'sum': sum([float(z['amount'])/1e12 for z in data]),
             'txs': data
         }
 
