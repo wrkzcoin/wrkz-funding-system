@@ -25,11 +25,11 @@ def api_proposals_get(status, cat, limit, offset):
     return [p.json for p in proposals]
 
 
-@app.route('/api/1/convert/wow-usd')
+@app.route('/api/1/convert/aeon-usd')
 @endpoint.api(
-    parameter('wow', type=int, location='args', required=True)
+    parameter('amount', type=int, location='args', required=True)
 )
-def api_wow_usd(wow):
+def api_wow_usd(amount):
     from wowfunding.bin.utils import Summary, wow_to_usd
     prices = Summary.fetch_prices()
-    return jsonify(usd=wow_to_usd(wows=wow, btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd']))
+    return jsonify(usd=wow_to_usd(wows=amount, btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd']))
