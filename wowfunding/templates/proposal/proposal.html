@@ -11,11 +11,6 @@
             <!-- Title -->
             <h1 class="mt-4" style="margin-bottom: 0.1rem;">
                 {{ proposal.headline }}
-
-                <div id="point-wow-left">
-                    <img src="/static/point-left.png" style="margin-left: 10px;width: 60px;">
-                    <span style="color: #fc4dff;font-size: 16px;font-style: italic;font-weight: bold;margin-left: 6px;">wow</span>
-                </div>
             </h1>
 
             <p>
@@ -40,7 +35,7 @@
                 {% if proposal.status <= 1 %}
                 <br>
                 <span>
-                    Target: <b>{{proposal.funds_target|round}}</b> WOW
+                    Target: <b>{{proposal.funds_target|round}}</b> AEON
                      {% if proposal.funds_target_usd %}
                     <small>➞ {{proposal.funds_target_usd}} USD</small>
                     {% endif %}
@@ -70,7 +65,7 @@
                                             <tr>
                                                 <td>Target</td>
                                                 <td>
-                                                    <span class="badge">{{proposal.funds_target|round}} WOW
+                                                    <span class="badge">{{proposal.funds_target|round}} AEON
                                                      {% if proposal.funds_target_usd %}
                                                     <small>➞ {{proposal.funds_target_usd}} USD</small>
                                                     {% endif %}
@@ -100,7 +95,7 @@
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {{proposal.balance['remaining'] or 0}} WOW available
+                                    {{proposal.balance['remaining'] or 0}} AEON available
 
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
@@ -122,7 +117,6 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="alert alert-danger">
-                            <img src="/static/doge_head.png" style="width: 64px;margin-right: 8px;">
                             This proposal is disabled.
                         </div>
                     </div>
@@ -157,9 +151,9 @@
                             {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
                             <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
                             <br>
-                            <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
+                            <a target="_blank" href="https://aeonblocks.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
                             <span style="float:right;color:#008926;font-weight:bold;">
-                                + {{tx['amount_human']|round(2)}} WOW
+                                + {{tx['amount_human']|round(2)}} AEON
                                 {% if 'amount_usd' in tx %}
                                 <small style="color: black">
                                     ➞ $ {{tx['amount_usd']}}

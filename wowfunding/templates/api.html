@@ -10,24 +10,24 @@
             </p>
             <p>
                 <ul>
-                    <li><a href="#api_convert_wow_usd">/api/1/convert/wow-usd</a></li>
+                    <li><a href="#api_convert_wow_usd">/api/1/convert/aeon-usd</a></li>
                     <li><a href="#api_proposals">/api/1/proposals</a></li>
                 </ul>
             </p>
             <br>
 
             <div class="api_container" id="api_convert_wow_usd">
-                <h5><small>GET</small> <code>/api/1/convert/wow-usd</code></h5>
+                <h5><small>GET</small> <code>/api/1/convert/aeon-usd</code></h5>
                 <hr>
                 <p>
-                    WOW to USD conversion. Data from TradeOgre and CoinMarketCap.
+                    AEON to USD conversion. Data is pulled from Bittrex.com and CoinMarketCap.com
                 </p>
 
                 <b>Example:</b>
-                <pre>curl -vvX GET 'https://funding.wownero.com/api/1/convert/wow-usd?wow=1000'</pre>
+                <pre>curl -vvX GET 'https://aeonfunding.com/api/1/convert/aeon-usd?amount=1000'</pre>
 
                 <b>Response:</b>
-                <pre>{"usd": 6.7}</pre>
+                <pre>{"usd": 729.82}</pre>
             </div>
 
             <div class="api_container" id="api_proposals">
@@ -45,25 +45,27 @@
                 </ul>
 
                 <b>Example:</b>
-                <pre>curl -vvX GET 'https://funding.wownero.com/api/1/proposals?offset=0&limit=1&status=2'</pre>
+                <pre>curl -vvX GET 'https://aeonfunding.com/api/1/proposals?offset=0&limit=1&status=2'</pre>
 
                 <b>Response:</b>
                 <pre>{
-    "data": [
-        {
-            "id": 15,
-            "user": "dsc",
-            "headline": "[Bounty] Memes",
-            "content": "### markdown Content",
-            "category": "marketing",
-            "addr_donation": "WW3LcKRi3vJGSn11256Q819gExLtfsR3DZeGneu7K55QeeS4YcKMaDAHZ16hRM2gmJT7pVRiTGesjCsJUNAJPTn42rnh7wZEa",
-            "date_posted": "Jul 09 2018 21:59:26",
-            "date_posted_epoch": "1531173566",
-            "funded_pct": 33.3333333333333,
-            "funds_target": 15000.0,
-            "status": 2
-        }
-    ]
+   {
+  "data": [
+    {
+      "addr_donation": "XnYwVf3coXSCvQAjzzTKJEeMWxzCMUbzQbA3kZsqPoieR1xYW7RxbLjjLGmZLDwXc6hsNGDwWeyMTDxNL8AYHVjH1WCD8dmHy", 
+      "category": "marketing", 
+      "content_markdown": "elite cam = good cam! :D \nwords left to go = 20\nso many more to go.\nwatch that word counter go up !", 
+      "date_posted": "Aug 28 2018 02:46:05", 
+      "date_posted_epoch": "1535424365", 
+      "funded_pct": 0.0, 
+      "funds_target": 1.0, 
+      "headline": "cam fixed the funds_target issue", 
+      "id": 19, 
+      "status": 2, 
+      "user": "camthegeek"
+    }
+  ]
+}
 }</pre>
             </div>
         </div>
