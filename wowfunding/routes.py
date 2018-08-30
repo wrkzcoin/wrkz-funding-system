@@ -88,7 +88,7 @@ def proposal(pid):
     parameter('title', type=str, required=True, location='json'),
     parameter('content', type=str, required=True, location='json'),
     parameter('pid', type=int, required=False, location='json'),
-    parameter('funds_target', type=float, required=True, location='json'),
+    parameter('funds_target', type=str, required=True, location='json'),
     parameter('addr_receiving', type=str, required=True, location='json'),
     parameter('category', type=str, required=True, location='json'),
     parameter('status', type=int, required=True, location='json', default=1)
@@ -99,7 +99,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     if current_user.is_anonymous:
         return make_response(jsonify('err'), 500)
 
-    if len(title) <= 10:
+    if len(title) <= 8:
         return make_response(jsonify('title too short'), 500)
     if len(content) <= 20:
         return make_response(jsonify('content too short'), 500)
@@ -147,10 +147,15 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p.status = status
         p.last_edited = datetime.now()
     else:
-        if funds_target <= 1:
-            return make_response(jsonify('proposal asking less than 1 error :)'), 500)
+        try: 
+            funds_target = float(funds_target) 
+        #   return make_response(jsonify('digits only plz'),500)
+        except Exception as ex:
+            return make_response(jsonify('letters detected'),500)
+        if funds_target < 1:
+                return make_response(jsonify('Proposal asking less than 1 error :)'), 500)
         if len(addr_receiving) != 97:
-            return make_response(jsonify('faulty addr_receiving address, should be of length 72'), 500)
+            return make_response(jsonify('Faulty address, should be of length 72'), 500)
 
         p = Proposal(headline=title, content=content, category='misc', user=current_user)
         p.html = html
