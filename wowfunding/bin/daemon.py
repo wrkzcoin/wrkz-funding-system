@@ -26,31 +26,53 @@ class WowneroDaemon:
         print('rpc to be sent: %s' % str(data))
         return self._make_request(data)
 
-    def get_address(self, index):
+    def get_address(self, index, proposal_id):
         data = {
-            'method': 'get_address',
-            'params': {'address_index': [index], 'account_index': 0},
+            'method': 'getaddress',
+            'params': {'account_index': proposal_id, 'address_index': '[0]'},
             'jsonrpc': '2.0',
             'id': '0'
         }
+        #print('rpc to be sent: %s' % str(data))
         try:
             result = self._make_request(data)
-            return next(z for z in result['result']['addresses'] if z['address_index'] == index)
+        #    print('data from result %s' % result)
+            #return next(z for z in result['result']['address'])# if z['address_index'] == '0')
+            return result['result']
         except:
             return
 
-    def get_transfers_in(self, index):
+    def get_transfers_in(self, index, proposal_id):
         data = {
             "method":"get_transfers",
-            "params": {"pool": True, "in": True, "account_index": 0, "subaddr_indices": [index]},
+            "params": {"pool": True, "in": True, "account_index": proposal_id},
             "jsonrpc": "2.0",
             "id": "0",
         }
+        print('rpc to be sent: %s' % str(data))
         data = self._make_request(data)
         data = data['result'].get('in', [])
+        print('this is in data %s' % data)
         for d in data:
             d['amount_human'] = float(d['amount'])/1e12
-
+        return {
+            'sum': sum([float(z['amount'])/1e12 for z in data]),
+            'txs': data
+        }
+    
+    def get_transfers_out(self, index, proposal_id):
+        data = {
+            "method":"get_transfers",
+            "params": {"pool": True, "out": True, "account_index": proposal_id},
+            "jsonrpc": "2.0",
+            "id": "0",
+        }
+        print('rpc to be sent: %s' % str(data))
+        data = self._make_request(data)
+        data = data['result'].get('out', [])
+        print('this is in data %s' % data)
+        for d in data:
+            d['amount_human'] = float(d['amount'])/1e12
         return {
             'sum': sum([float(z['amount'])/1e12 for z in data]),
             'txs': data
