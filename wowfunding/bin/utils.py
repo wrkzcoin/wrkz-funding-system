@@ -1,24 +1,20 @@
 from datetime import datetime, date
-
 import requests
 from flask import g
 from flask.json import JSONEncoder
 import json
 import settings
 
-
 def json_encoder(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
-
 
 class Summary:
     @staticmethod
     def fetch_prices():
         if hasattr(g, 'wowfunding_prices') and g.wow_prices:
             return g.wow_prices
-
         from wowfunding.factory import cache
         cache_key = 'wowfunding_prices'
         data = cache.get(cache_key)
@@ -65,7 +61,6 @@ class Summary:
         cache.set(cache_key, data=data, expiry=5)
         return data
 
-
 def price_cmc_btc_usd():
     headers = {'User-Agent': 'Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0'}
     try:
@@ -74,7 +69,6 @@ def price_cmc_btc_usd():
         return r.json().get('data', {}).get('quotes', {}).get('USD', {}).get('price')
     except:
         return
-
 
 def price_tradeogre_wow_btc():
     headers = {'User-Agent': 'Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0'}
