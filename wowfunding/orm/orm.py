@@ -250,6 +250,18 @@ class Proposal(base):
             db_session.flush()
             return addr_donation['address']
 
+    @staticmethod  
+    def generate_proposal_subaccount(pid):
+        from wowfunding.bin.daemon import WowneroDaemon
+
+        try:
+            print('id= %s' % str(pid))
+            WowneroDaemon().create_account(pid)
+        except Exception as ex:
+            #print('account_id received as %s' % str(account_id))
+            print('error: %s' % str(ex))
+            return
+
     @classmethod
     def find_by_args(cls, status: int = None, cat: str = None, limit: int = 20, offset=0):
         from wowfunding.factory import db_session

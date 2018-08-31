@@ -101,6 +101,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
 
     if len(title) <= 8:
         return make_response(jsonify('title too short'), 500)
+
     if len(content) <= 20:
         return make_response(jsonify('content too short'), 500)
 
@@ -172,6 +173,11 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     # reset cached statistics
     from wowfunding.bin.utils import Summary
     Summary.fetch_stats(purge=True)
+
+    print('pid=%s' % str(p.id))
+    proposalID = p.id
+    Proposal.generate_proposal_subaccount(proposalID)
+    
 
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
 

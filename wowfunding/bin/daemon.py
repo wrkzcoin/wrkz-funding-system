@@ -16,6 +16,16 @@ class WowneroDaemon:
         }
         return self._make_request(data)
 
+    def create_account(self, pid):
+        data = {
+            'method': 'create_account',
+            'params': {'label': '%s' % pid},
+            'jsonrpc': '2.0',
+            'id': '0'
+        }
+        print('rpc to be sent: %s' % str(data))
+        return self._make_request(data)
+
     def get_address(self, index):
         data = {
             'method': 'get_address',
