@@ -195,13 +195,58 @@ class Proposal(base):
         if not data:
             from wowfunding.bin.daemon import WowneroDaemon
             try:
-                data = WowneroDaemon().get_transfers_in(index=self.id)
+                data = WowneroDaemon().get_transfers_in(index=self.id, proposal_id=self.id)
                 if not isinstance(data, dict):
                     print('error; get_transfers; %d' % self.id)
                     return rtn
                 cache.set(cache_key, data=data, expiry=300)
             except:
                 print('error; get_transfers; %d' % self.id)
+                return rtn
+
+        prices = Summary.fetch_prices()
+        for tx in data['txs']:
+            if prices:
+                tx['amount_usd'] = wow_to_usd(wows=tx['amount_human'], btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
+            tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
+
+        if data.get('sum', 0.0):
+            data['pct'] = 100 / float(self.funds_target / data.get('sum', 0.0))
+            data['remaining'] = data['sum'] - self.funds_withdrew
+        else:
+            data['pct'] = 0.0
+            data['remaining'] = 0.0
+
+        if data['pct'] != self.funds_progress:
+            self.funds_progress = data['pct']
+            db_session.commit()
+            db_session.flush()
+
+        if data['remaining']:
+            data['remaining_pct'] = 100 / float(data['sum'] / data['remaining'])
+        else:
+            data['remaining_pct'] = 0.0
+
+        return data
+
+    @property
+    def spends(self):
+        from wowfunding.bin.utils import Summary, wow_to_usd
+        from wowfunding.factory import cache, db_session
+        rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
+
+        cache_key = 'wow_spends_pid_%d' % self.id
+        data = cache.get(cache_key)
+        if not data:
+            from wowfunding.bin.daemon import WowneroDaemon
+            try:
+                data = WowneroDaemon().get_transfers_out(index=self.id, proposal_id=self.id)
+                if not isinstance(data, dict):
+                    print('error; get_transfers_out; %d' % self.id)
+                    return rtn
+                cache.set(cache_key, data=data, expiry=5)
+            except:
+                print('error; get_transfers_out; %d' % self.id)
                 return rtn
 
         prices = Summary.fetch_prices()
@@ -237,9 +282,11 @@ class Proposal(base):
             return cls.addr_donation
 
         try:
-            addr_donation = WowneroDaemon().get_address(index=cls.id)
+            print('This is the ID of something cls.id=%s' % cls.id)
+            addr_donation = WowneroDaemon().get_address(index=cls.id, proposal_id=cls.id)
             if not isinstance(addr_donation, dict):
                 raise Exception('get_address, needs dict; %d' % cls.id)
+            print('generated address %s ' % addr_donation)
         except Exception as ex:
             print('error: %s' % str(ex))
             return
