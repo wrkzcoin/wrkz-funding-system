@@ -170,6 +170,37 @@
     <!-- /.row -->
     {% endif %}
 
+
+{% if proposal.spends['txs'] %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card my-6" id="incoming_txs">
+                <h5 class="card-header">Outgoing transactions <small>({{proposal.spends['txs']|length}})</small></h5>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for tx in proposal.spends['txs'] %}
+                        <li class="list-group-item">
+                            {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
+                            <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
+                            <br>
+                            <a target="_blank" href="https://aeonblocks.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
+                            <span style="float:right;color:#890000;font-weight:bold;">
+                                - {{tx['amount_human']|round(2)}} AEON
+                                {% if 'amount_usd' in tx %}
+                                <small style="color: black">
+                                    ➞ $ {{tx['amount_usd']}}
+                                </small>
+                                {% endif %}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+    {% endif %}
 </div>
 
 <script>
