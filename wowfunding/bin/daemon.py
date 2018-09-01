@@ -1,10 +1,12 @@
 import settings
 import requests
+from requests.auth import HTTPDigestAuth
 
-
-class WowneroDaemon:
+class Daemon:
     def __init__(self):
         self.url = settings.RPC_LOCATION
+        self.username = settings.RPC_USERNAME
+        self.password = settings.RPC_PASSWORD
         self.headers = {"User-Agent": "Mozilla"}
 
     def create_address(self, label_name):
@@ -23,7 +25,6 @@ class WowneroDaemon:
             'jsonrpc': '2.0',
             'id': '0'
         }
-        print('rpc to be sent: %s' % str(data))
         return self._make_request(data)
 
     def get_address(self, index, proposal_id):
@@ -33,11 +34,8 @@ class WowneroDaemon:
             'jsonrpc': '2.0',
             'id': '0'
         }
-        #print('rpc to be sent: %s' % str(data))
         try:
             result = self._make_request(data)
-        #    print('data from result %s' % result)
-            #return next(z for z in result['result']['address'])# if z['address_index'] == '0')
             return result['result']
         except:
             return
@@ -49,10 +47,8 @@ class WowneroDaemon:
             "jsonrpc": "2.0",
             "id": "0",
         }
-        print('rpc to be sent: %s' % str(data))
         data = self._make_request(data)
         data = data['result'].get('in', [])
-        print('this is in data %s' % data)
         for d in data:
             d['amount_human'] = float(d['amount'])/1e12
         return {
@@ -67,10 +63,8 @@ class WowneroDaemon:
             "jsonrpc": "2.0",
             "id": "0",
         }
-        print('rpc to be sent: %s' % str(data))
         data = self._make_request(data)
         data = data['result'].get('out', [])
-        print('this is in data %s' % data)
         for d in data:
             d['amount_human'] = float(d['amount'])/1e12
         return {
@@ -79,6 +73,10 @@ class WowneroDaemon:
         }
 
     def _make_request(self, data):
-        r = requests.post(self.url, json=data, headers=self.headers)
+        if self.username:
+            if self.password:
+                r = requests.post(self.url, auth=HTTPDigestAuth(settings.RPC_USERNAME, settings.RPC_PASSWORD), json=data, headers=self.headers)
+        else:
+            r = requests.post(self.url, json=data, headers=self.headers)
         r.raise_for_status()
         return r.json()

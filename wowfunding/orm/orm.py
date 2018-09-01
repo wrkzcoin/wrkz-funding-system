@@ -1,12 +1,10 @@
 from datetime import datetime
-
 import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 import settings
 
 base = declarative_base(name="Model")
-
 
 class User(base):
     __tablename__ = "users"
@@ -17,7 +15,6 @@ class User(base):
     registered_on = sa.Column(sa.DateTime)
     admin = sa.Column(sa.Boolean, default=False)
     proposals = relationship('Proposal', back_populates="user")
-
     comments = relationship("Comment", back_populates="user")
 
     def __init__(self, username, password, email):
@@ -47,7 +44,7 @@ class User(base):
         return self.id
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return self.username
 
     @classmethod
     def add(cls, username, password, email):
@@ -184,7 +181,7 @@ class Proposal(base):
     def balance(self):
         """This property retrieves the current funding status
         of this proposal. It uses Redis cache to not spam the
-        wownerod too much. Returns a nice dictionary containing
+        daemon too much. Returns a nice dictionary containing
         all relevant proposal funding info"""
         from wowfunding.bin.utils import Summary, wow_to_usd
         from wowfunding.factory import cache, db_session
@@ -193,9 +190,9 @@ class Proposal(base):
         cache_key = 'wow_balance_pid_%d' % self.id
         data = cache.get(cache_key)
         if not data:
-            from wowfunding.bin.daemon import WowneroDaemon
+            from wowfunding.bin.daemon import Daemon
             try:
-                data = WowneroDaemon().get_transfers_in(index=self.id, proposal_id=self.id)
+                data = Daemon().get_transfers_in(index=self.id, proposal_id=self.id)
                 if not isinstance(data, dict):
                     print('error; get_transfers; %d' % self.id)
                     return rtn
@@ -238,9 +235,9 @@ class Proposal(base):
         cache_key = 'wow_spends_pid_%d' % self.id
         data = cache.get(cache_key)
         if not data:
-            from wowfunding.bin.daemon import WowneroDaemon
+            from wowfunding.bin.daemon import Daemon
             try:
-                data = WowneroDaemon().get_transfers_out(index=self.id, proposal_id=self.id)
+                data = Daemon().get_transfers_out(index=self.id, proposal_id=self.id)
                 if not isinstance(data, dict):
                     print('error; get_transfers_out; %d' % self.id)
                     return rtn
@@ -272,13 +269,13 @@ class Proposal(base):
     @staticmethod
     def generate_donation_addr(cls):
         from wowfunding.factory import db_session
-        from wowfunding.bin.daemon import WowneroDaemon
+        from wowfunding.bin.daemon import Daemon
         if cls.addr_donation:
             return cls.addr_donation
 
         try:
             print('This is the ID of something cls.id=%s' % cls.id)
-            addr_donation = WowneroDaemon().get_address(index=cls.id, proposal_id=cls.id)
+            addr_donation = Daemon().get_address(index=cls.id, proposal_id=cls.id)
             if not isinstance(addr_donation, dict):
                 raise Exception('get_address, needs dict; %d' % cls.id)
             print('generated address %s ' % addr_donation)
@@ -294,11 +291,11 @@ class Proposal(base):
 
     @staticmethod  
     def generate_proposal_subaccount(pid):
-        from wowfunding.bin.daemon import WowneroDaemon
+        from wowfunding.bin.daemon import Daemon
 
         try:
             print('id= %s' % str(pid))
-            WowneroDaemon().create_account(pid)
+            Daemon().create_account(pid)
         except Exception as ex:
             #print('account_id received as %s' % str(account_id))
             print('error: %s' % str(ex))
