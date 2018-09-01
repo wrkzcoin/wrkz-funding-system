@@ -73,7 +73,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>Progress</td>
+                                                <td>Funded</td>
                                                 <td><span class="badge">{{proposal.balance['pct'] |round}} %</span></td>
                                             </tr>
                                         </tbody>
@@ -95,13 +95,34 @@
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {{proposal.balance['remaining'] or 0}} AEON available
-
+                                    {{proposal.balance['available'] or 0}} AEON Raised
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
                                         </div>
                                     </div>
+                                    <hr>
                                 </div>
+                                <br/>
+                                
+                                <br/>
+                                <div class="col-lg-8">
+                                    {{proposal.spends['spent'] or 0}} AEON Paid out
+                                    <div class="progress">
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['remaining_pct']}}%;">
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </div>
+                                <div class="col-lg-8">
+                                    {{(proposal.balance['available']-proposal.spends['spent']) or 0}} AEON Remaining
+                                    <div class="progress">
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </div>
+
+                                <br/>
                             </div>
                             <div class="row" style="margin-top:16px;">
                                 <div class="col-lg-12">
