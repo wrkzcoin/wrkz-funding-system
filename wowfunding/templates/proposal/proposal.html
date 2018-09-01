@@ -74,7 +74,7 @@
                                             </tr>
                                             <tr>
                                                 <td>Funded</td>
-                                                <td><span class="badge">{{proposal.balance['pct'] |round}} %</span></td>
+                                                <td><span class="badge">{{proposal.balance['pct'] | round or 0}} %</span></td>
                                             </tr>
                                         </tbody>
                                     </table>

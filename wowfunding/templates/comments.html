@@ -15,7 +15,7 @@
                                 </div>
                             </div>
                         </div>
-                        <input type="submit" value="add comment">
+                        <input type="submit" value="add comment" id="submit_button" onclick="this.disabled=true,this.form.submit();">
                     </form>
                 {% else %}
                     You need to be logged in to comment.

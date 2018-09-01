@@ -93,7 +93,7 @@
                     </div>
 
                     <div class="form-group">
-                        <button onclick="submit_proposal();" type="submit" class="btn btn-primary">Submit</button>
+                        <button onclick="submit_proposal();" type="submit" class="btn btn-primary" id="submit_button">Submit</button>
                     </div>
                 </form>
             </div>
@@ -121,6 +121,13 @@
         });
 
         function submit_proposal() {
+            document.getElementById('submit_button').disabled = 'disabled';
+            
+            function enable_button() { 
+                document.getElementById('submit_button').disabled = 'enabled';
+            }
+            setTimeout(enable_button, 10000);;
+
             function error(msg){
                 var error_div = document.getElementById("error");
                 error_div.style.display = "block";
@@ -130,6 +137,7 @@
             function success(data){
                 var data = JSON.parse(data);
                 window.location.href = data.url;
+
             }
 
             var data = {
@@ -164,6 +172,8 @@
                     }
                 }
             };
+
+            
 
             xhr.onerror = function () {
                 error(xhr.responseText);
