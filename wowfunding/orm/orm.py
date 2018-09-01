@@ -212,18 +212,18 @@ class Proposal(base):
 
         if data.get('sum', 0.0):
             data['pct'] = 100 / float(self.funds_target / data.get('sum', 0.0))
-            data['remaining'] = data['sum'] - self.funds_withdrew
+            data['available'] = data['sum']
         else:
             data['pct'] = 0.0
-            data['remaining'] = 0.0
+            data['available'] = 0.0
 
         if data['pct'] != self.funds_progress:
             self.funds_progress = data['pct']
             db_session.commit()
             db_session.flush()
 
-        if data['remaining']:
-            data['remaining_pct'] = 100 / float(data['sum'] / data['remaining'])
+        if data['available']:
+            data['remaining_pct'] = 100 / float(data['sum'] / data['available'])
         else:
             data['remaining_pct'] = 0.0
 
@@ -257,18 +257,13 @@ class Proposal(base):
 
         if data.get('sum', 0.0):
             data['pct'] = 100 / float(self.funds_target / data.get('sum', 0.0))
-            data['remaining'] = data['sum'] - self.funds_withdrew
+            data['spent'] = data['sum']
         else:
             data['pct'] = 0.0
-            data['remaining'] = 0.0
+            data['spent'] = 0.0
 
-        if data['pct'] != self.funds_progress:
-            self.funds_progress = data['pct']
-            db_session.commit()
-            db_session.flush()
-
-        if data['remaining']:
-            data['remaining_pct'] = 100 / float(data['sum'] / data['remaining'])
+        if data['spent']:
+            data['remaining_pct'] = 100 / float(data['sum'] / data['spent'])
         else:
             data['remaining_pct'] = 0.0
 
