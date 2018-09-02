@@ -57,7 +57,7 @@ class Summary:
 
         data.setdefault('users', {})
         data['users']['count'] = db_session.query(User.id).count()
-        cache.set(cache_key, data=data, expiry=5)
+        cache.set(cache_key, data=data, expiry=300)
         return data
 
 def price_cmc_btc_usd():
