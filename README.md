@@ -28,6 +28,6 @@ python run_dev.py
 https://imgur.com/KKzFQe9
 https://imgur.com/Dl3wRgD
 
-- Define coin variable
-- Define one exchange API URL
-- Automated setup
+- [x] Define coin variable
+- [] Define one exchange API URL
+- [] Automated setup
