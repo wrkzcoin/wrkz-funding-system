@@ -21,7 +21,7 @@ The AEON Funding System was written entirely in Python. It was originally develo
 
 Better instructions to follow in the future.
 
-###Install dependancies
+### Install dependancies
 
 ```sudo apt install python-virtualenv python3 redis-server postgresql-server-dev-* postgresql postgres-client python-pip virtualenv git```
 
