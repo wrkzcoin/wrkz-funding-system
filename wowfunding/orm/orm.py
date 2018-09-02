@@ -146,11 +146,11 @@ class Proposal(base):
 
     @property
     def funds_target_usd(self):
-        from wowfunding.bin.utils import Summary, wow_to_usd
+        from wowfunding.bin.utils import Summary, coin_to_usd
         prices = Summary.fetch_prices()
         if not prices:
             return
-        return wow_to_usd(wows=self.funds_target, btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
+        return coin_to_usd(amt=self.funds_target, btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
 
     @property
     def comment_count(self):
@@ -183,28 +183,28 @@ class Proposal(base):
         of this proposal. It uses Redis cache to not spam the
         daemon too much. Returns a nice dictionary containing
         all relevant proposal funding info"""
-        from wowfunding.bin.utils import Summary, wow_to_usd
+        from wowfunding.bin.utils import Summary, coin_to_usd
         from wowfunding.factory import cache, db_session
         rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
 
-        cache_key = 'wow_balance_pid_%d' % self.id
+        cache_key = 'coin_balance_pid_%d' % self.id
         data = cache.get(cache_key)
         if not data:
             from wowfunding.bin.daemon import Daemon
             try:
                 data = Daemon().get_transfers_in(index=self.id, proposal_id=self.id)
                 if not isinstance(data, dict):
-                    print('error; get_transfers; %d' % self.id)
+                    print('error; get_transfers_in; %d' % self.id)
                     return rtn
                 cache.set(cache_key, data=data, expiry=300)
             except:
-                print('error; get_transfers; %d' % self.id)
+                print('error; get_transfers_in; %d' % self.id)
                 return rtn
 
         prices = Summary.fetch_prices()
         for tx in data['txs']:
             if prices:
-                tx['amount_usd'] = wow_to_usd(wows=tx['amount_human'], btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
+                tx['amount_usd'] = coin_to_usd(amt=tx['amount_human'], btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
             tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
 
         if data.get('sum', 0.0):
@@ -228,11 +228,11 @@ class Proposal(base):
 
     @property
     def spends(self):
-        from wowfunding.bin.utils import Summary, wow_to_usd
+        from wowfunding.bin.utils import Summary, coin_to_usd
         from wowfunding.factory import cache, db_session
         rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
 
-        cache_key = 'wow_spends_pid_%d' % self.id
+        cache_key = 'coin_spends_pid_%d' % self.id
         data = cache.get(cache_key)
         if not data:
             from wowfunding.bin.daemon import Daemon
@@ -241,7 +241,7 @@ class Proposal(base):
                 if not isinstance(data, dict):
                     print('error; get_transfers_out; %d' % self.id)
                     return rtn
-                cache.set(cache_key, data=data, expiry=5)
+                cache.set(cache_key, data=data, expiry=300)
             except:
                 print('error; get_transfers_out; %d' % self.id)
                 return rtn
@@ -249,7 +249,7 @@ class Proposal(base):
         prices = Summary.fetch_prices()
         for tx in data['txs']:
             if prices:
-                tx['amount_usd'] = wow_to_usd(wows=tx['amount_human'], btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
+                tx['amount_usd'] = coin_to_usd(amt=tx['amount_human'], btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
             tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
 
         if data.get('sum', 0.0):
@@ -274,11 +274,9 @@ class Proposal(base):
             return cls.addr_donation
 
         try:
-            print('This is the ID of something cls.id=%s' % cls.id)
             addr_donation = Daemon().get_address(index=cls.id, proposal_id=cls.id)
             if not isinstance(addr_donation, dict):
                 raise Exception('get_address, needs dict; %d' % cls.id)
-            print('generated address %s ' % addr_donation)
         except Exception as ex:
             print('error: %s' % str(ex))
             return
@@ -294,10 +292,8 @@ class Proposal(base):
         from wowfunding.bin.daemon import Daemon
 
         try:
-            print('id= %s' % str(pid))
             Daemon().create_account(pid)
         except Exception as ex:
-            #print('account_id received as %s' % str(account_id))
             print('error: %s' % str(ex))
             return
 

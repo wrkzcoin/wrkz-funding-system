@@ -122,7 +122,7 @@
 
         function submit_proposal() {
             document.getElementById('submit_button').disabled = 'disabled';
-            
+
             function enable_button() { 
                 document.getElementById('submit_button').disabled = 'enabled';
             }
@@ -173,17 +173,12 @@
                 }
             };
 
-            
-
             xhr.onerror = function () {
                 error(xhr.responseText);
             };
 
             xhr.send(JSON.stringify(data));
-
         }
-
-
     </script>
 
 {% endblock %}

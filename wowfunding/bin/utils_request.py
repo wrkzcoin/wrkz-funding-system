@@ -25,8 +25,8 @@ def before_request():
 
 @app.after_request
 def after_request(res):
-    if hasattr(g, 'wowfunding_prices'):
-        delattr(g, 'wowfunding_prices')
+    if hasattr(g, 'funding_prices'):
+        delattr(g, 'funding_prices')
     res.headers.add('Accept-Ranges', 'bytes')
     if settings.DEBUG:
         res.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
