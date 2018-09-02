@@ -3,8 +3,8 @@ from flask import request, redirect, Response, abort, render_template, url_for, 
 from flask.ext.login import login_user , logout_user , current_user , login_required, current_user
 from flask_yoloapi import endpoint, parameter
 import settings
-from wowfunding.factory import app, db_session
-from wowfunding.orm.orm import Proposal, User
+from funding.factory import app, db_session
+from funding.orm.orm import Proposal, User
 
 @app.route('/api/1/proposals')
 @endpoint.api(
@@ -26,6 +26,6 @@ def api_proposals_get(status, cat, limit, offset):
     parameter('amount', type=int, location='args', required=True)
 )
 def api_coin_usd(amount):
-    from wowfunding.bin.utils import Summary, coin_to_usd
+    from funding.bin.utils import Summary, coin_to_usd
     prices = Summary.fetch_prices()
     return jsonify(usd=coin_to_usd(amt=amount, btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd']))

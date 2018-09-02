@@ -1,9 +1,9 @@
 from datetime import datetime
 from flask import session, g
 import settings
-from wowfunding.bin.utils import Summary
-from wowfunding.factory import app, db_session
-from wowfunding.orm.orm import Proposal, User, Comment
+from funding.bin.utils import Summary
+from funding.factory import app, db_session
+from funding.orm.orm import Proposal, User, Comment
 
 @app.context_processor
 def templating():

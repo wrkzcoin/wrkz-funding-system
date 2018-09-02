@@ -4,8 +4,8 @@ from flask.ext.login import login_user , logout_user , current_user, login_requi
 from flask_yoloapi import endpoint, parameter
 
 import settings
-from wowfunding.factory import app, db_session
-from wowfunding.orm.orm import Proposal, User, Comment
+from funding.factory import app, db_session
+from funding.orm.orm import Proposal, User, Comment
 
 
 @app.route('/')
@@ -61,7 +61,7 @@ def proposal_comment(pid, text, cid):
 
 @app.route('/proposal/<int:pid>/comment/<int:cid>')
 def propsal_comment_reply(cid, pid):
-    from wowfunding.orm.orm import Comment
+    from funding.orm.orm import Comment
     c = Comment.find_by_id(cid)
     if not c or c.replied_to:
         return redirect(url_for('proposal', pid=pid))
@@ -115,7 +115,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         return make_response(jsonify('no rights to change status'), 500)
 
     try:
-        from wowfunding.bin.anti_xss import such_xss
+        from funding.bin.anti_xss import such_xss
         content_escaped = such_xss(content)
         html = markdown2.markdown(content_escaped, safe_mode=True)
     except Exception as ex:
@@ -179,7 +179,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     db_session.flush()
 
     # reset cached statistics
-    from wowfunding.bin.utils import Summary
+    from funding.bin.utils import Summary
     Summary.fetch_stats(purge=True)
 
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
@@ -268,7 +268,7 @@ def login(username, password):
     if request.method == 'GET':
         return make_response(render_template('login.html'))
 
-    from wowfunding.factory import bcrypt
+    from funding.factory import bcrypt
     user = User.query.filter_by(username=username).first()
     if user is None or not bcrypt.check_password_hash(user.password, password):
         flash('Username or Password is invalid', 'error')

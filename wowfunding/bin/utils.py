@@ -15,7 +15,7 @@ class Summary:
     def fetch_prices():
         if hasattr(g, 'funding_prices') and g.coin_prices:
             return g.coin_prices
-        from wowfunding.factory import cache
+        from funding.factory import cache
         cache_key = 'funding_prices'
         data = cache.get(cache_key)
         if data:
@@ -30,9 +30,9 @@ class Summary:
 
     @staticmethod
     def fetch_stats(purge=False):
-        from wowfunding.factory import db_session
-        from wowfunding.orm.orm import Proposal, User, Comment
-        from wowfunding.factory import cache
+        from funding.factory import db_session
+        from funding.orm.orm import Proposal, User, Comment
+        from funding.factory import cache
         cache_key = 'funding_stats'
         data = cache.get(cache_key)
         if data and not purge:
