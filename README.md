@@ -23,7 +23,7 @@ Better instructions to follow in the future.
 
 ### Install dependancies
 
-```sudo apt install python-virtualenv python3 redis-server postgresql-server-dev-* postgresql postgres-client python-pip virtualenv git```
+```sudo apt install python-virtualenv python3 redis-server postgresql-server-dev-* postgresql postgresql-client python-pip virtualenv git```
 
 Create a Postgres user/database for this project
 
