@@ -95,10 +95,19 @@
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {{proposal.balance['available'] or 0}} AEON Raised
+                                    {{proposal.balance['available']|round(3) or 0 }} AEON Raised 
+                                    {% if (proposal.funds_target-proposal.balance['available']|float|round(3)) > 0 %} 
+                                        ({{ (proposal.funds_target-proposal.balance['available']|float|round(3)|int) }} AEON until goal)
+                                        
+                                        {% elif (proposal.funds_target-proposal.balance['available']|round(3)|float) < -0.009 %} 
+                                        ({{ (proposal.balance['available']-proposal.funds_target|float|round(3)|int) }} AEON past goal!)
+
+                                        {% else %}
+                                        (on goal)
+                                    {% endif %}
                                     <div class="progress">
-                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
-                                        </div>
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['pct']}}%;">
+                                        </div> 
                                     </div>
                                     <hr>
                                 </div>
@@ -106,15 +115,15 @@
                                 
                                 <br/>
                                 <div class="col-lg-8">
-                                    {{proposal.spends['spent'] or 0}} AEON Paid out
+                                    {{proposal.spends['spent']|round(3) or 0}} AEON Paid out
                                     <div class="progress">
-                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['remaining_pct']}}%;">
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['spent_remaining_pct']}}%;">
                                         </div>
                                     </div>
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {{(proposal.balance['available']-proposal.spends['spent']) or 0}} AEON Available
+                                    {{((proposal.balance['available']-proposal.spends['spent'])-proposal.spends['fees']) |round(3) or 0}} AEON Available to Payout
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
                                         </div>
@@ -174,7 +183,7 @@
                             <br>
                             <a target="_blank" href="https://aeonblocks.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
                             <span style="float:right;color:#008926;font-weight:bold;">
-                                + {{tx['amount_human']|round(2)}} AEON
+                                + {{tx['amount_human']|round(3)}} AEON
                                 {% if 'amount_usd' in tx %}
                                 <small style="color: black">
                                     ➞ $ {{tx['amount_usd']}}
@@ -206,11 +215,13 @@
                             <br>
                             <a target="_blank" href="https://aeonblocks.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
                             <span style="float:right;color:#890000;font-weight:bold;">
-                                - {{tx['amount_human']|round(2)}} AEON
+                                - {{tx['amount_human']|round(3)}} AEON
                                 {% if 'amount_usd' in tx %}
                                 <small style="color: black">
                                     ➞ $ {{tx['amount_usd']}}
                                 </small>
+                                <br/>
+                                <span style="float:right; color: #1230f0;">tx fee: {{ tx['fee_human']|round(10) }}</span>
                                 {% endif %}
                             </span>
                         </li>

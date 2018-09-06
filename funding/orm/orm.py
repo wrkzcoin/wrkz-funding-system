@@ -230,7 +230,7 @@ class Proposal(base):
     def spends(self):
         from funding.bin.utils import Summary, coin_to_usd
         from funding.factory import cache, db_session
-        rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
+        rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0, 'fees': []}
 
         cache_key = 'coin_spends_pid_%d' % self.id
         data = cache.get(cache_key)
@@ -260,9 +260,9 @@ class Proposal(base):
             data['spent'] = 0.0
 
         if data['spent']:
-            data['remaining_pct'] = 100 / float(data['sum'] / data['spent'])
+            data['spent_remaining_pct'] = 100 / float(data['sum'] / data['spent'])
         else:
-            data['remaining_pct'] = 0.0
+            data['spent_remaining_pct'] = 0.0
 
         return data
 

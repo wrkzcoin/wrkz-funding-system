@@ -20,6 +20,9 @@
                     {% if proposals['proposed'] %}
                         {{ proposal_table(title='Proposals', status=1, _proposals=proposals['proposed']) }}
                         <br>
+                        {% else %} 
+                        No proposals are currently waiting for funding. Perhaps you should <a href="https://aeonfunding.com/proposal/add/disclaimer">Add a Proposal!</a>
+                        <br/>
                     {% endif %}
                 </div>
             </div>
