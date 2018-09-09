@@ -58,6 +58,41 @@ def proposal_comment(pid, text, cid):
     flash('Comment posted.')
     return redirect(url_for('proposal', pid=pid))
 
+@app.route('/proposal/comment/edit', methods=['POST'])
+@endpoint.api(
+    parameter('pid', type=int, required=True),
+    parameter('text', type=str, required=True),
+    parameter('cid', type=int, required=False)
+)
+def proposal_comment_fedit(pid, text, cid):
+    if current_user.is_anonymous:
+        flash('not logged in', 'error')
+        return redirect(url_for('proposal', pid=pid))
+    if len(text) <= 3:
+        flash('comment too short', 'error')
+        return redirect(url_for('proposal', pid=pid))
+    try:
+        Comment.edit(user_id=current_user.id, message=text, pid=pid, cid=cid)
+    except Exception as ex:
+        flash('Could not edit comment: %s' % str(ex), 'error')
+        return redirect(url_for('proposal', pid=pid))
+
+    flash('Comment updated.')
+    return redirect(url_for('proposal', pid=pid))
+
+
+@app.route('/proposal/<int:onpid>/remove-comment/<int:removecID>/<int:puid>')
+def proposal_com_remove(removecID, onpid, puid):
+    if current_user.is_anonymous:
+        flash('not logged in', 'error')
+        return redirect(url_for('proposal', pid=onpid))
+    try:
+        Comment.remove(cid=removecID, pid=onpid, puid=puid)
+    except Exception as ex:
+        flash('Could not remove comment: %s' % str(ex), 'error')
+        return redirect(url_for('proposal', pid=onpid))
+    flash('Comment removed')
+    return redirect(url_for('proposal', pid=onpid))
 
 @app.route('/proposal/<int:pid>/comment/<int:cid>')
 def propsal_comment_reply(cid, pid):
@@ -73,6 +108,19 @@ def propsal_comment_reply(cid, pid):
 
     return make_response(render_template('comment_reply.html', c=c, pid=pid, cid=cid))
 
+@app.route('/proposal/<int:pid>/comment-edit/<int:cid>')
+def proposal_comment_edit(cid, pid):
+    from funding.orm.orm import Comment
+    c = Comment.find_by_id(cid)
+    if c.locked:
+        raise Exception('comment is locked, cannot edit or delete')
+    p = Proposal.find_by_id(pid)
+    if not p:
+        return redirect(url_for('proposals'))
+    if c.proposal_id != p.id:
+        return redirect(url_for('proposals'))
+
+    return make_response(render_template('comment_edit.html', c=c, pid=pid, cid=cid))
 
 @app.route('/proposal/<int:pid>')
 def proposal(pid):
@@ -121,8 +169,6 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     except Exception as ex:
         return make_response(jsonify('markdown error'), 500)
 
-
-
     if pid:
         p = Proposal.find_by_id(pid=pid)
         if not p:
@@ -150,7 +196,6 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p.status = status
         p.last_edited = datetime.now()
 
-
     else:
         try: 
             funds_target = float(funds_target) 
@@ -173,8 +218,6 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p.status = status
         db_session.add(p)
     
-
-
     db_session.commit()
     db_session.flush()
 

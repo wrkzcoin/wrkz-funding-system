@@ -7,10 +7,17 @@ body {
         padding-top: 56px;
     }
 }
-.center { 
-text-align: center;
-margin: 0 auto 0 auto;
+
+.deletecomment { 
+    font-weight: bold;
+    color: #921818;
 }
+
+.center { 
+    text-align: center;
+    margin: 0 auto 0 auto;
+}
+
 .navbar {
     padding: .1rem 1rem;
 }

@@ -48,7 +48,17 @@
                         <span data-id="{{c.id}}" class="body" style="{% if c.automated %}color:blue;{% endif %};word-break: break-all;">{{c.message}}</span>
                         <br>
                         {% if not c.automated %}
+                            {% if not c.locked %}
                         <a class="reply" href="{{url_for('propsal_comment_reply', cid=c.id, pid=proposal.id)}}">reply</a>
+                        {% if (current_user.cur_id == c.user.cur_id) or (current_user.admin) %} 
+                                {% if not c.locked %}
+                                    <a class="deletecomment" href="{{url_for('proposal_com_remove', removecID=c.id, onpid=proposal.id, puid=c.user.cur_id)}}">delete</a> | 
+                                    <a class="" href="{{url_for('proposal_comment_edit', cid=c.id, pid=proposal.id)}}">edit</a>
+                                {% else %}
+                                    comment is locked for editing/deleting
+                                {%endif%}
+                            {% endif %}
+                            {% endif %}
                         {% endif %}
 
                         {% for _c in c.comments %}
@@ -71,11 +81,12 @@
                                     <a href="/proposal/{{proposal.id}}#comment-{{_c.id}}">
                                         {{_c.date_added.strftime('%Y-%m-%d %H:%M')}}
                                     </a>
-                                </span>
-                                <br>
-                                <span data-id="{{_c.id}}" class="body" style="word-break: break-all;">
-                                {{_c.message}}
-                                </span>
+                                 </span>
+                                <br/>
+                                {% if (current_user.cur_id == _c.user.cur_id) or (current_user.admin) and (not _c.locked) %} 
+                                    <a class="deletecomment" href="{{url_for('proposal_com_remove', removecID=_c.id, onpid=proposal.id, puid=_c.user.cur_id)}}">delete</a> | 
+                                    <a class="" href="{{url_for('proposal_comment_edit', cid=_c.id, pid=proposal.id)}}">edit</a> 
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
