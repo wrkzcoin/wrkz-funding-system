@@ -3,7 +3,8 @@ import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 import settings
-
+import pyqrcode
+import os
 
 base = declarative_base(name="Model")
 
@@ -291,7 +292,36 @@ class Proposal(base):
             db_session.commit()
             db_session.flush()
             return addr_donation['address']
-   
+    #word to the noobs.
+    #you need to add your own coin logo somewhere.
+    #and change a line below.
+    @staticmethod
+    def generate_donation_addr_qr(donation_addr, pid):
+        print(pid)
+        from funding.factory import db_session
+        from PIL import Image
+        url = pyqrcode.create(donation_addr, error='L')
+        print('checkpoint 1')
+        filename = os.path.abspath('funding/static/qr/'+donation_addr+'.png')
+        logod = os.path.abspath('funding/static/aeon.jpg')
+        print('checkpoint 2')
+        url.png(filename,scale=10)
+        im = Image.open(filename)
+        im = im.convert("RGBA")
+        width, height = im.size
+        logo_size = 76
+        logo = Image.open(logod)
+        print('checkpoint 3')
+        xmin = ymin = int((width / 2) - (logo_size / 2))
+        xmax = ymax = int((width / 2) + (logo_size / 2))
+        logo = logo.resize((xmax - xmin, ymax - ymin))
+        im.paste(logo, (xmin, ymin, xmax, ymax))
+        im.save(filename)
+        p = Proposal.find_by_id(pid)
+        p.generated_qr = True
+        db_session.commit()
+        db_session.flush()
+
     @staticmethod  
     def generate_proposal_subaccount(pid):
         from funding.bin.daemon import Daemon

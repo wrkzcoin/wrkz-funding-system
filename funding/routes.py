@@ -190,6 +190,8 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             msg = "Moved to status \"%s\"." % settings.FUNDING_STATUSES[status].capitalize()
             try:
                 Comment.add_comment(user_id=current_user.id, message=msg, pid=pid, automated=True)
+                if not p.generated_qr:
+                    Proposal.generate_donation_addr_qr(donation_addr=p.addr_donation, pid=pid)
             except:
                 pass
 
@@ -209,7 +211,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p = Proposal(headline=title, content=content, category='misc', user=current_user)
         proposalID = current_user
         addr_donation = Proposal.generate_proposal_subaccount(proposalID)
-        p.addr_donation = addr_donation
+        p.addr_donation = addr_donation  
         p.html = html
         p.last_edited = datetime.now()
         p.funds_target = funds_target
@@ -221,10 +223,17 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     db_session.commit()
     db_session.flush()
 
+    if p.addr_donation:
+        donation_addr = p.addr_donation
+        Proposal.generate_donation_addr_qr(donation_addr, p.id)
+        print('QR Code generated')
+    else:
+        print('QR Code will be generated when moved to funding.')
+        print('pid %s' % addr_donation)  
     # reset cached statistics
     from funding.bin.utils import Summary
     Summary.fetch_stats(purge=True)
-
+    
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
 
 

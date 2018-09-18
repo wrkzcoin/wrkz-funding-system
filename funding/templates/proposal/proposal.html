@@ -134,12 +134,23 @@
                                 <br/>
                             </div>
                             <div class="row" style="margin-top:16px;">
-                                <div class="col-lg-12">
+                                <div class="col-lg-10">
                                     Donation address:
-                                    <pre class="proposal_address">{% if proposal.addr_donation %}{{ proposal.addr_donation }}{% else %}<small>None generated yet</small>{% endif %}</pre>
+                                    <pre class="proposal_address">
+                                        {% if proposal.addr_donation %}
+                                            {{ proposal.addr_donation }}
+                                        {% else %}
+                                            <small>None generated yet</small>
+                                        {% endif %}
+                                    </pre>
                                 </div>
+                                <div class="col-lg-2">
+                                    QR Code:<br/>
+                                    <span class="qr_code">
+                                        <img src="/static/qr/{{ proposal.addr_donation }}.png" style="width:128px"/>
+                                    </span>
+                                </div>                       
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
