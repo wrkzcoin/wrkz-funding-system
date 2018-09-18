@@ -25,7 +25,11 @@ class Daemon:
             'jsonrpc': '2.0',
             'id': '0'
         }
-        return self._make_request(data)
+        try:
+            result = self._make_request(data)
+            return result['result']['address']
+        except:
+            return
 
     def get_address(self, index, proposal_id):
         data = {

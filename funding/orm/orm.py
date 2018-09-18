@@ -4,6 +4,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 import settings
 
+
 base = declarative_base(name="Model")
 
 class User(base):
@@ -290,13 +291,14 @@ class Proposal(base):
             db_session.commit()
             db_session.flush()
             return addr_donation['address']
-
+   
     @staticmethod  
     def generate_proposal_subaccount(pid):
         from funding.bin.daemon import Daemon
 
         try:
-            Daemon().create_account(pid)
+            created = Daemon().create_account(pid)
+            return created
         except Exception as ex:
             print('error: %s' % str(ex))
             return
