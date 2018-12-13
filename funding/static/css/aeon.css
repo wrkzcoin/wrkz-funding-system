@@ -88,6 +88,11 @@ margin: 0 auto 0 auto;
     padding: 2px;
 }
 
+.table {
+    display: block;
+    overflow-x: auto;
+}
+
 .table td, .table th {
     padding: 0.35rem;
 }
