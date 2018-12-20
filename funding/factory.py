@@ -8,6 +8,7 @@ sentry = None
 cache = None
 db_session = None
 bcrypt = None
+mail = None
 
 
 def create_app():
@@ -28,6 +29,13 @@ def create_app():
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 30
     app.secret_key = settings.SECRET
 
+    from flask_mail import Mail
+    mail = Mail(app)
+    app.config["MAIL_SERVER"] = settings.MAIL_SERVER
+    app.config["MAIL_PORT"] = settings.MAIL_PORT
+    app.config["MAIL_USE_SSL"] = True
+    app.config["MAIL_USERNAME"] = settings.MAIL_USERNAME
+    app.config["MAIL_PASSWORD"] = settings.MAIL_PASSWORD
     # flask-login
     from flask.ext.login import LoginManager
     login_manager = LoginManager()
