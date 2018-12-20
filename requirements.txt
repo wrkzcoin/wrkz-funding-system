@@ -9,3 +9,5 @@ gunicorn
 psycopg2
 markdown2
 requests
+itsdangerous
+flask-mail

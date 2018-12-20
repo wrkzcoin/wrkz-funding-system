@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<!--main-->
+<div class="container" id="main">
+    {% include 'messages.html' %}
+
+    <div class="row">
+        <style>
+            #xox>*{
+                float:left;
+            }
+            #xox>img{
+                height:42px;
+                padding-left:4px;
+            }
+        </style>
+        <div class="col-lg-8" id="xox">
+            <h3>Password reset</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <form class="form-horizontal" action="" method=post>
+                <div class="form-group">
+                    <label class="sr-only" for="inlineFormInput">Email</label>
+                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="inlineFormInput"
+                           placeholder="Email" name="email">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-sm">Reset password</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-4">
+        </div>
+        {% include 'sidebar.html' %}
+    </div>
+</div>
+<br>
+<!--/main-->
+{% endblock %}
