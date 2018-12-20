@@ -69,14 +69,27 @@ def price_cmc_btc_usd():
     except:
         return
 
+#if your coin is on tradeogre, uncomment all this. 
+#def coin_btc_value():
+#    headers = {'User-Agent': 'Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0'}
+#    try:
+#        eurl = 'https://tradeogre.com/api/v1/ticker/BTC-{coincode}'.format(coincode=settings.COINCODE)
+#        r = requests.get(eurl, headers=headers)
+#        r.raise_for_status()
+#        return float(r.json().get('high'))
+#    except:
+#        return
+
+#grab values from bittrex.
 def coin_btc_value():
     headers = {'User-Agent': 'Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0'}
     try:
-        r = requests.get('https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-aeon', headers=headers)
+        r = requests.get('https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-{coincode}', headers=headers).format(coincode=settings.COINCODE)
         value = r.json()['result'][0]['High']
         return value
     except:
         return
+
 
 def coin_to_usd(amt: float, usd_per_btc: float, btc_per_coin: float):
     try:

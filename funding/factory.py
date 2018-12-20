@@ -2,6 +2,7 @@
 import settings
 from werkzeug.contrib.fixers import ProxyFix
 from flask import Flask
+import sys
 
 app = None
 sentry = None
@@ -9,7 +10,6 @@ cache = None
 db_session = None
 bcrypt = None
 mail = None
-
 
 def create_app():
     global app
@@ -37,13 +37,14 @@ def create_app():
     app.config["MAIL_USE_SSL"] = True
     app.config["MAIL_USERNAME"] = settings.MAIL_USERNAME
     app.config["MAIL_PASSWORD"] = settings.MAIL_PASSWORD
+    
     # flask-login
-    from flask.ext.login import LoginManager
+    from flask_login import LoginManager
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'login'
 
-    from flask.ext.bcrypt import Bcrypt
+    from flask_bcrypt import Bcrypt
     bcrypt = Bcrypt(app)
 
     @login_manager.user_loader
@@ -52,14 +53,13 @@ def create_app():
         return User.query.get(int(_id))
 
     # session init
-    from funding.cache import JsonRedis, WowCache
+    from funding.cache import JsonRedis, Cache
     app.session_interface = JsonRedis(key_prefix=app.config['SESSION_PREFIX'], use_signer=False)
-    cache = WowCache()
+    cache = Cache()
 
     # import routes
     from funding import routes
     from funding import api
     from funding.bin import utils_request
 
-    app.app_context().push()
     return app
