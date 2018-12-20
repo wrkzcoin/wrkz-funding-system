@@ -47,7 +47,7 @@ class JsonRedis(RedisSessionInterface):
             use_signer=use_signer)
 
 
-class WowCache:
+class Cache:
     def __init__(self):
         self._cache = redis.StrictRedis(**redis_args())
 
