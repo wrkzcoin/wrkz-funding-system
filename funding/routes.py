@@ -190,6 +190,8 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             msg = "Moved to status \"%s\"." % settings.FUNDING_STATUSES[status].capitalize()
             try:
                 Comment.add_comment(user_id=current_user.id, message=msg, pid=pid, automated=True)
+                if not p.generated_qr:
+                    Proposal.generate_donation_addr_qr(donation_addr=p.addr_donation, pid=pid)
             except:
                 pass
 
@@ -220,6 +222,12 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     
     db_session.commit()
     db_session.flush()
+
+    if p.addr_donation:
+        donation_addr = p.addr_donation
+        Proposal.generate_donation_addr_qr(donation_addr, p.id)
+    else:
+        return
 
     # reset cached statistics
     from funding.bin.utils import Summary
