@@ -13,7 +13,7 @@ class User(base):
     id = sa.Column('user_id', sa.Integer, primary_key=True)
     username = sa.Column(sa.String(20), unique=True, index=True)
     password = sa.Column(sa.String(60))
-    email = sa.Column(sa.String(50), unique=True, index=True)
+    email = sa.Column(sa.String(50), unique=True)
     registered_on = sa.Column(sa.DateTime)
     admin = sa.Column(sa.Boolean, default=False)
     proposals = relationship('Proposal', back_populates="user")
@@ -71,7 +71,19 @@ class User(base):
             db_session.rollback()
             raise
 
+    @staticmethod
+    def edit(email: str, password: str): 
+        from funding.factory import db_session
+        from funding.factory import bcrypt
+        try:
+            db_session.query(User).filter(User.email == email).update({'password': bcrypt.generate_password_hash(password).decode('utf8')})
+            db_session.commit()
+            db_session.flush()
+        except Exception as ex:
+            db_session.rollback()
+            raise
 
+            
 class Proposal(base):
     __tablename__ = "proposals"
     id = sa.Column(sa.Integer, primary_key=True)

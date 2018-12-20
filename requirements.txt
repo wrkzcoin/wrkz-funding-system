@@ -12,3 +12,5 @@ requests
 pyqrcode
 pillow
 pypng
+itsdangerous
+flask-mail

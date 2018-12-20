@@ -2,11 +2,11 @@ from datetime import datetime
 from flask import request, redirect, Response, abort, render_template, url_for, flash, make_response, send_from_directory, jsonify
 from flask.ext.login import login_user , logout_user , current_user, login_required, current_user
 from flask_yoloapi import endpoint, parameter
-
+from itsdangerous import URLSafeTimedSerializer, BadData, SignatureExpired
 import settings
 from funding.factory import app, db_session
 from funding.orm.orm import Proposal, User, Comment
-
+from flask_mail import Message
 
 @app.route('/')
 def index():
@@ -344,3 +344,62 @@ def logout():
 @app.route('/static/<path:path>')
 def static_route(path):
     return send_from_directory('static', path)
+
+#password reset
+@app.route('/account/password/reset', methods=['GET', 'POST'])
+@endpoint.api(
+    parameter('email', type=str, location='form')
+)
+
+def passResetStart(email):
+    if request.method == 'GET':
+        return make_response(render_template('reset.html'))
+
+    xquery = db_session.query(User)
+    searchQ = xquery.filter_by(email=email).first()
+    if searchQ is None:
+        return
+    else: 
+        key = URLSafeTimedSerializer(settings.SECRET,salt='passwordreset')
+        token = key.dumps({'email': searchQ.email})
+        msg = Message("Password Reset Request",
+        sender="settings.USER_EMAIL_SENDER_EMAIL",
+        recipients=[email])
+        msg.body = "Hi, we received a request to reset your password on the {coincode} Funding System ({siteurl}).\n\n Please click this link to reset your password: {siteurl}account/password/reset/{token}".format(siteurl=settings.SITE_URL,coincode=settings.COINCODE, token=token)
+        flash('Password reset email sent')
+        mail.send(msg)
+
+    return make_response(render_template('reset.html'))
+
+@app.route('/account/password/reset/<token>', methods=['GET', 'POST'])
+@endpoint.api(
+    parameter('password', type=str, location='form')
+)
+def passwordReset(token, password, max_age=1200):
+    s = URLSafeTimedSerializer(settings.SECRET, salt='passwordreset')
+    try: 
+        values = s.loads(token, max_age=max_age)
+    except SignatureExpired:
+        flash('Reset password URL link is too old.')
+        return redirect(url_for('login'))
+    except BadData as e:
+        print('Bad login token "{}"', token)
+        return redirect(url_for('login'))
+    except SignatureExpired:
+        return None
+
+    userEmail = values['email']
+    if (password):
+        try:
+            User.edit(email=userEmail, password=password)
+            if (current_user.is_authenticated):
+                flash('Password was changed.')
+                return redirect(url_for('user', name=current_user))
+            else:
+                flash('Password was changed. You may log in now.')
+                return redirect(url_for('login'))
+        except Exception as ex:
+            flash('Could not change password: %s' % str(ex), 'error')
+
+    else:
+        return make_response(render_template('password.html'))
