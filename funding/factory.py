@@ -17,6 +17,7 @@ def create_app():
     global sentry
     global cache
     global bcrypt
+    global mail
 
     from funding.orm.connect import create_session
     db_session = create_session()
