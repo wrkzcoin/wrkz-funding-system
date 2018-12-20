@@ -381,7 +381,7 @@ class Comment(base):
     proposal_id = sa.Column(sa.Integer, sa.ForeignKey('proposals.id'))
     proposal = relationship("Proposal", back_populates="comments")
 
-    user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'), nullable=False)
+    user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'))
     user = relationship("User", back_populates="comments")
 
     date_added = sa.Column(sa.TIMESTAMP, default=datetime.now)
@@ -407,19 +407,28 @@ class Comment(base):
         return db_session.query(Comment).filter(Comment.id == cid).first()
 
     @staticmethod
-    def remove(cid: int):
+    def remove(cid: int, pid: int, puid: int):
         from funding.factory import db_session
-        from flask.ext.login import current_user
-        if current_user.id != user_id and not current_user.admin:
+        from flask_login import current_user
+        if current_user.id != puid and not current_user.admin:
             raise Exception("no rights to remove this comment")
-        comment = Comment.get(cid=cid)
-        try:
-            comment.delete()
-            db_session.commit()
-            db_session.flush()
-        except:
-            db_session.rollback()
-            raise
+        comment = Comment.find_by_id(cid=cid)
+        if not comment.replied_to:
+            comment.message = "comment removed by %s" % current_user
+            comment.locked = True
+            try: 
+                db_session.commit()
+                db_session.flush()
+            except:
+                db_session.rollback()
+        else:
+            try:
+                db_session.delete(comment)
+                db_session.commit()
+                db_session.flush()
+            except:
+                db_session.rollback()
+                raise
 
     @staticmethod
     def lock(cid: int):
@@ -480,3 +489,21 @@ class Comment(base):
             db_session.rollback()
             raise Exception(str(ex))
         return comment
+
+    @staticmethod
+    def edit(cid: int, pid: int, message: str, user_id: int):
+        from funding.factory import db_session
+        from flask_login import current_user
+        if current_user.id != user_id and not current_user.admin:
+            raise Exception("no rights to remove this comment")
+        comment = Comment.find_by_id(cid=cid)
+        if not comment.locked:
+            try:
+                db_session.query(Comment).filter(Comment.id == cid).update({'message': message})
+                db_session.commit()
+                db_session.flush()
+            except:
+                db_session.rollback()
+                raise
+        else:
+            raise Exception("Comment is locked and can not be edited")
