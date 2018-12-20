@@ -3,7 +3,9 @@ import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 import settings
-
+import pyqrcode
+import os
+import png
 base = declarative_base(name="Model")
 
 class User(base):
@@ -87,6 +89,7 @@ class Proposal(base):
     date_added = sa.Column(sa.TIMESTAMP, default=datetime.now)
     html = sa.Column(sa.VARCHAR)
     last_edited = sa.Column(sa.TIMESTAMP)
+    generated_qr = sa.Column(sa.Boolean, default=False)
 
     # the FFS target
     funds_target = sa.Column(sa.Float, nullable=False)
@@ -298,6 +301,33 @@ class Proposal(base):
             db_session.commit()
             db_session.flush()
             return addr_donation['address']
+
+    #super simple possibly faulty way of generating qr codes. but it works /shrug
+    #qr codes are saved to funding/static/qr
+    #a logo can be added directly to the middle -- see variable: logod below
+    #will turn that into a global setting later on.
+    @staticmethod
+    def generate_donation_addr_qr(donation_addr, pid):
+        from funding.factory import db_session
+        from PIL import Image
+        url = pyqrcode.create(donation_addr, error='L')
+        filename = os.path.abspath('funding/static/qr/'+donation_addr+'.png')
+        logod = os.path.abspath('funding/static/aeon.jpg')
+        url.png(filename,scale=10)
+        im = Image.open(filename)
+        im = im.convert("RGBA")
+        width, height = im.size
+        logo_size = 76
+        logo = Image.open(logod)
+        xmin = ymin = int((width / 2) - (logo_size / 2))
+        xmax = ymax = int((width / 2) + (logo_size / 2))
+        logo = logo.resize((xmax - xmin, ymax - ymin))
+        im.paste(logo, (xmin, ymin, xmax, ymax))
+        im.save(filename)
+        p = Proposal.find_by_id(pid)
+        p.generated_qr = True
+        db_session.commit()
+        db_session.flush()
 
     @staticmethod  
     def generate_proposal_subaccount(pid):
