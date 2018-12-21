@@ -6,7 +6,6 @@ import settings
 import pyqrcode
 import os
 import png
-
 base = declarative_base(name="Model")
 
 class User(base):
@@ -385,7 +384,7 @@ class Payout(base):
     @classmethod
     def add(cls, proposal_id, amount, to_address):
         # @TODO: validate that we can make this payout; check previous payouts
-        from flask.login import current_user
+        from flask.ext.login import current_user
         if not current_user.admin:
             raise Exception("user must be admin to add a payout")
         from funding.factory import db_session
@@ -464,7 +463,7 @@ class Comment(base):
     @staticmethod
     def lock(cid: int):
         from funding.factory import db_session
-        from flask.login import current_user
+        from flask.ext.login import current_user
         if not current_user.admin:
             raise Exception("admin required")
         comment = Comment.find_by_id(cid=cid)
@@ -481,7 +480,7 @@ class Comment(base):
 
     @classmethod
     def add_comment(cls, pid: int, user_id: int, message: str, cid: int = None, message_id: int = None, automated=False):
-        from flask.login import current_user
+        from flask.ext.login import current_user
         from funding.factory import db_session
         if not message:
             raise Exception("empty message")
