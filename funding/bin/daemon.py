@@ -1,5 +1,6 @@
 import settings
 import requests
+from flask import json
 from requests.auth import HTTPDigestAuth
 
 class Daemon:
@@ -8,6 +9,9 @@ class Daemon:
         self.username = settings.RPC_USERNAME
         self.password = settings.RPC_PASSWORD
         self.headers = {"User-Agent": "Mozilla"}
+        self.daemon_url = settings.DAEMON_URL
+        self.daemon_usr = settings.DAEMON_RPC_USER
+        self.daemon_pass = settings.DAEMON_RPC_PASS
 
     def create_address(self, label_name):
         data = {
@@ -80,3 +84,37 @@ class Daemon:
             r = requests.post(self.url, json=data, headers=self.headers)
         r.raise_for_status()
         return r.json()
+
+    #dont ask why I did this. it just works.
+    def _make_daemon_request(self, data):
+        if self.daemon_usr:
+            s = requests.post(self.daemon_url, auth=HTTPDigestAuth(settings.DAEMON_RPC_USER, settings.DAEMON_RPC_PASS), json=data, headers=self.headers)
+            s.raise_for_status()
+            return s.json()
+
+    def get_wallet_height(self):
+        data = { 
+            "method":"getheight",
+            "jsonrpc": "2.0",
+            "id": "0",
+        }
+        try:
+            data = self._make_request(data)
+            return data['result']
+        except: 
+            offline_Wallet = {'height': 0}
+            data['result'] = eval(json.dumps(offline_Wallet))
+            return data['result']
+
+    def get_daemon_height(self):
+        daemon_data = { 
+            "method":"get_info",
+            "jsonrpc": "2.0",
+            "id": "0"
+        }
+        try:
+            daemon_data = self._make_daemon_request(daemon_data)
+            return daemon_data['result']
+        except:
+            offlineDaemon = {'height': 0, 'status': 'Offline'}
+            return eval(json.dumps(offlineDaemon))
