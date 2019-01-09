@@ -6,6 +6,7 @@ import settings
 import pyqrcode
 import os
 import png
+from hashlib import md5
 
 base = declarative_base(name="Model")
 
@@ -19,6 +20,7 @@ class User(base):
     admin = sa.Column(sa.Boolean, default=False)
     proposals = relationship('Proposal', back_populates="user")
     comments = relationship("Comment", back_populates="user")
+    last_online = sa.Column(sa.DateTime, default=datetime.utcnow)
 
     def __init__(self, username, password, email):
         from funding.factory import bcrypt
@@ -80,6 +82,9 @@ class User(base):
             db_session.rollback()
             raise
 
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
 class Proposal(base):
     __tablename__ = "proposals"

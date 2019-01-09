@@ -8,6 +8,16 @@ from funding.factory import app, db_session
 from funding.orm.orm import Proposal, User, Comment
 from flask_mail import Message
 
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        try:
+            current_user.last_online = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            db_session.commit()
+            db_session.flush()
+        except: 
+            db_session.rollback()
+
 @app.route('/')
 def index():
     return redirect(url_for('proposals'))
