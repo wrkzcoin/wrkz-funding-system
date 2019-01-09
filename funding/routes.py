@@ -18,6 +18,15 @@ def before_request():
         except: 
             db_session.rollback()
 
+@app.context_processor
+def daemonstatus():
+    try:
+        daemon_height = Proposal.get_daemon_height()
+        wallet_height = Proposal.get_wallet_height()
+        return dict(walletheight=wallet_height, daemonheight=daemon_height)
+    except:
+        return None
+
 @app.route('/')
 def index():
     return redirect(url_for('proposals'))

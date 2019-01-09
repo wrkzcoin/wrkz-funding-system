@@ -375,6 +375,20 @@ class Proposal(base):
         return q.all()
 
 
+    @classmethod
+    def get_wallet_height(self):
+        from funding.factory import db_session
+        from funding.bin.daemon import Daemon
+        data = Daemon().get_wallet_height()
+        return data
+
+    @classmethod
+    def get_daemon_height(self):
+        from funding.factory import db_session
+        from funding.bin.daemon import Daemon
+        data = Daemon().get_daemon_height()
+        return data
+
 class Payout(base):
     __tablename__ = "payouts"
     id = sa.Column(sa.Integer, primary_key=True)
