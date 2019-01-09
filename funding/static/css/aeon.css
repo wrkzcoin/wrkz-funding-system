@@ -131,6 +131,11 @@ body {
     padding: 0;
 }
 
+.navbar-dark .navbar-brand-mobile:hover {
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
 .table-proposal td {
     font-size: 15px;
 }
