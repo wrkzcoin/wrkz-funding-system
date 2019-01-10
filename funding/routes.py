@@ -27,6 +27,10 @@ def daemonstatus():
     except:
         return None
 
+@app.context_processor
+def getCoinCode():
+    return dict(coincode=settings.COINCODE, site_url=settings.SITE_URL)
+
 @app.route('/')
 def index():
     return redirect(url_for('proposals'))
