@@ -25,14 +25,14 @@ class JsonRedisSerializer:
     @staticmethod
     def loads(val):
         try:
-            return json.loads(val).get("wow", {})
+            return json.loads(val).get("fundingwrkz", {})
         except ValueError:
             return
 
     @staticmethod
     def dumps(val):
         try:
-            return json.dumps({"wow": val})
+            return json.dumps({"fundingwrkz": val})
         except ValueError:
             return
 

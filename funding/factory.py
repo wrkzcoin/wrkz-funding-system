@@ -19,7 +19,7 @@ def _setup_cache(app: Flask):
     cache_config = {
         "CACHE_TYPE": "redis",
         "CACHE_DEFAULT_TIMEOUT": 60,
-        "CACHE_KEY_PREFIX": "wow_cache_",
+        "CACHE_KEY_PREFIX": "fundingwrkz_cache_",
         "CACHE_REDIS_PORT": settings.REDIS_PORT
     }
 

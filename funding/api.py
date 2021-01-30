@@ -49,7 +49,7 @@ def api_qr_generate(address):
             return Response('Wait a bit before generating a new QR', 403)
 
         throttling_seconds = 3
-        cache.set(cache_key, {'wow': 'kek'}, throttling_seconds)
+        cache.set(cache_key, {'fundingwrkz': 'kek'}, throttling_seconds)
 
         created = qr.create(address)
         if not created:

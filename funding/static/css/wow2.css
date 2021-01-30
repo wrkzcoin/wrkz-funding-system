@@ -100,7 +100,6 @@ html {
 body {
   margin-bottom: 60px; /* Margin bottom by footer height */
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
-  background-image: url("/static/bg.png");
   background-repeat: repeat;
 }
 
