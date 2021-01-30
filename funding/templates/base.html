@@ -1,5 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+░░░░░░░█▐▓▓░████▄▄▄█▀▄▓▓▓▌█ very website
+░░░░░▄█▌▀▄▓▓▄▄▄▄▀▀▀▄▓▓▓▓▓▌█
+░░░▄█▀▀▄▓█▓▓▓▓▓▓▓▓▓▓▓▓▀░▓▌█
+░░█▀▄▓▓▓███▓▓▓███▓▓▓▄░░▄▓▐█▌ such html
+░█▌▓▓▓▀▀▓▓▓▓███▓▓▓▓▓▓▓▄▀▓▓▐█
+▐█▐██▐░▄▓▓▓▓▓▀▄░▀▓▓▓▓▓▓▓▓▓▌█▌   WOW
+█▌███▓▓▓▓▓▓▓▓▐░░▄▓▓███▓▓▓▄▀▐█
+█▐█▓▀░░▀▓▓▓▓▓▓▓▓▓██████▓▓▓▓▐█
+▌▓▄▌▀░▀░▐▀█▄▓▓██████████▓▓▓▌█▌
+▌▓▓▓▄▄▀▀▓▓▓▀▓▓▓▓▓▓▓▓█▓█▓█▓▓▌█▌ many donations
+█▐▓▓▓▓▓▓▄▄▄▓▓▓▓▓▓█▓█▓█▓█▓▓▓▐█     gib lambo
+-->
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,45 +23,50 @@
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
 
     <meta property="fb:app_id" content="0" />
-    <meta property="og:image" content="https://aeonfunding.com/aeon.png" />
-    <meta property="og:description" content="AEON Funding System - Projects by the community funded by the community" />
-    <meta property="og:url" content="https://aeonfunding.com/" />
-    <meta property="og:title" content="AEON Funding System" />
+    <meta property="og:image" content="https://funding.wownero.com/static/wowdoge-a.jpg" />
+    <meta property="og:description" content="The WrkzCoin Funding system" />
+    <meta property="og:url" content="https://funding.wrkz.work/" />
+    <meta property="og:title" content="WFS" />
     <meta property="og:type" content="website" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="theme-color" content="#ffffff">
-    <meta name="apple-mobile-web-app-title" content="AEON Funding System">
-    <meta name="application-name" content="AEON Funding System">
-    <meta name="msapplication-TileColor" content="#2c7dda">
+    <meta name="apple-mobile-web-app-title" content="WRKZ WFS">
+    <meta name="application-name" content="WrkzCoin WFS">
+    <meta name="msapplication-TileColor" content="#da532c">
     {% if proposal %}
         <meta name="description" content="{{proposal.content[:50]}}" />
-        <title>AEON Funding System - {{proposal.headline[:20]}}</title>
+        <title>WRKZ WFS - {{proposal.headline[:20]}}</title>
     {% else %}
-        <meta name="description" content="AEON Funding System - Community based projects funded by the AEON community" />
-        <title>AEON Funding System</title>
+        <meta name="description" content="The WrkzCoin Funding System" />
+        <title>WRKZ WFS</title>
     {% endif %}
-    <meta name="keywords" content="monero, xmr, bitmonero, cryptocurrency, crypto money, mining crypto currencies, virtual currency, aeon, aeon cash, wownero is best">
+    <meta name="keywords" content="monero, xmr, bitmonero, cryptocurrency, crypto money, mining crypto currencies, virtual currency">
 
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/bootstrap-grid.min.css" rel="stylesheet">
     <link href="/static/css/bootstrap-reboot.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/simplemde.min.css">
     <script src="/static/js/simplemde.min.js"></script>
-    <link href="/static/css/aeon.css" rel="stylesheet">
+    <link href="/static/css/wow2.css" rel="stylesheet">
     <script src="/static/js/app.js"></script>
     <script src="/static/js/jquery-3.2.1.slim.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
 </head>
 
 <body onload="fix_anchors();">
+
 {% include 'navbar.html' %}
 
 <!-- Page Content -->
 {% block content %} {% endblock %}
 
 <!-- Footer -->
-{% include 'footer.html' %}
+<footer class="bg-dark footer">
+    <div class="container">
+        <p class="m-0 text-center text-white">WrkzCoin Team 2018-2021</p>
+    </div>
+</footer>
 
 </body>
 </html>

@@ -1,47 +1,68 @@
-# AEON Funding System 
+# Wownero Funding System
 
-## Description
+![whoop](https://i.imgur.com/xVS3UGq.png)
 
-Do more with your cryptocurrency by getting the community involved. The goal of the AEON Funding System is to enable community members to complete projects and be paid for the projects by other community members. 
+A simple Flask application for managing donations.
 
-The AEON Funding System was written entirely in Python. It was originally developed by dsc_ (skftn) for the Wownero currency but later updated by various community members to be accepted for AEON and other cryptonote currencies. 
+Example
+-------
 
-## Features
-- Simplistic user system
-- Proposal system
-- Accounting system
-- Stats per proposal
--- Coins received
--- Coins paid out
--- Coins available
-- Comment system per proposal
-- More in development
+[https://funding.wownero.com](https://funding.wownero.com)
 
-## Installation (locally)
+## Installation
 
-Better instructions to follow in the future.
+Good luck with trying to get this to run! Some pointers:
 
-### Install dependancies
+#### Daemon
 
-```sudo apt install python-virtualenv python3 redis-server postgresql-server-dev-* postgresql postgresql-client python-pip virtualenv git```
+First make sure the daemon is up.
 
-Create a Postgres user/database for this project
+```bash
+./wownerod --max-concurrency 4
+```
+
+#### Wallet RPC
+
+Expose wallet via RPC.
+
+```bash
+./wownero-wallet-rpc --rpc-bind-port 45678 --disable-rpc-login --wallet-file wfs --password ""
+```
+
+
+#### Web application
+
+Download application and configure.
 
 ```
-git clone https://github.com/camthegeek/aeon-funding-system.git
-cd aeon-funding-system
-virtualenv -p /usr/bin/python3 <venv>
-source <venv>/bin/activate
+sudo apt install libjpeg-dev libpng-dev python-virtualenv python3 redis-server postgresql-server postgresql-server-dev-*
+git clone https://git.wownero.com/wownero/wownero-funding-system.git
+cd wownero-funding-system
+virtualenv -p /usr/bin/python3
+source venv/bin/activate
+pip uninstall pillow
 pip install -r requirements.txt
+CC="cc -mavx2" pip install -U --force-reinstall pillow-simd
 cp settings.py_example settings.py
 - change settings accordingly
+```
+
+Prepare a database in postgres and create an user for it.
+
+Run the application:
+
+```bash
 python run_dev.py
 ```
 
-### to-do
+Beware `run_dev.py` is meant as a development server.
 
-- [] rate limit posting of proposals per user
-- [x] Define coin variable
-- [] Define one exchange API URL
-- [] Automated setup
-- [] User follow proposals
+When running behind nginx/apache, inject `X-Forwarded-For`.
+
+### Contributors
+
+- [camthegeek](https://github.com/camthegeek)
+
+### License
+
+© 2018 WTFPL – Do What the Fuck You Want to Public License

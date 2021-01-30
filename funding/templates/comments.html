@@ -1,9 +1,9 @@
-{% from 'proposal/macros/comment.html' import comment_entry with context %}
+{% from 'proposal/macros/comment.html' import comment_entry %}
 
 <div class="row">
     <div class="col-md-12">
         <div class="card my-6" id="incoming_txs">
-            <h5 id="comments" class="card-header">Comments</h5>
+            <h5 style="border-radius:0px !important;" id="comments" class="card-header">Comments</h5>
             <div class="card-body comments-panel">
                 {% if logged_in %}
                     <form method="post" action="comment">
@@ -17,18 +17,17 @@
                                 </div>
                             </div>
                         </div>
-                        <input type="submit" value="add comment" id="submit_button" onclick="this.disabled=true,this.form.submit();">
+                        <input type="submit" value="add comment">
                     </form>
                 {% else %}
-                    You need to be logged in to comment.
+                    You need to be <a href="{{ url_for('login') }}">logged in</a> to comment.
                     <br>
                 {% endif %}
 
                 <br>
 
                 {% for c in proposal._comments if not c.automated %}
-                <!-- Single Comment -->
-                 {{ comment_entry(c, proposal) }}
+                    {{ comment_entry(c, proposal) }}
                 {% endfor %}
             </div>
         </div>

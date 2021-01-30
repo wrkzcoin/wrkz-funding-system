@@ -1,35 +1,18 @@
+import uuid
 from datetime import datetime
-from flask import request, redirect, Response, abort, render_template, url_for, flash, make_response, send_from_directory, jsonify
-from flask_login import login_user , logout_user , current_user, login_required, current_user
+
+import requests
+from flask import request, redirect, render_template, url_for, flash, make_response, send_from_directory, jsonify, session
+from flask_login import login_user , logout_user , current_user
+from dateutil.parser import parse as dateutil_parse
 from flask_yoloapi import endpoint, parameter
-from itsdangerous import URLSafeTimedSerializer, BadData, SignatureExpired
+
 import settings
-from funding.factory import app, db_session
-from funding.orm.orm import Proposal, User, Comment
-from flask_mail import Message
+from funding.factory import app, db, cache
+from funding.orm import Proposal, User, Comment
 
-@app.before_request
-def before_request():
-    if current_user.is_authenticated:
-        try:
-            current_user.last_online = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            db_session.commit()
-            db_session.flush()
-        except: 
-            db_session.rollback()
-
-@app.context_processor
-def daemonstatus():
-    try:
-        daemon_height = Proposal.get_daemon_height()
-        wallet_height = Proposal.get_wallet_height()
-        return dict(walletheight=wallet_height, daemonheight=daemon_height)
-    except:
-        return None
-
-@app.context_processor
-def getCoinCode():
-    return dict(coincode=settings.COINCODE, site_url=settings.SITE_URL)
+import secrets
+import json
 
 @app.route('/')
 def index():
@@ -48,7 +31,7 @@ def api():
 
 @app.route('/proposal/add/disclaimer')
 def proposal_add_disclaimer():
-    return make_response(render_template(('proposal/disclaimer.html')))
+    return make_response(render_template('proposal/disclaimer.html'))
 
 
 @app.route('/proposal/add')
@@ -84,7 +67,7 @@ def proposal_comment(pid, text, cid):
 
 @app.route('/proposal/<int:pid>/comment/<int:cid>')
 def propsal_comment_reply(cid, pid):
-    from funding.orm.orm import Comment
+    from funding.orm import Comment
     c = Comment.find_by_id(cid)
     if not c or c.replied_to:
         return redirect(url_for('proposal', pid=pid))
@@ -96,61 +79,13 @@ def propsal_comment_reply(cid, pid):
 
     return make_response(render_template('comment_reply.html', c=c, pid=pid, cid=cid))
 
-@app.route('/proposal/comment/edit', methods=['POST'])
-@endpoint.api(
-    parameter('pid', type=int, required=True),
-    parameter('text', type=str, required=True),
-    parameter('cid', type=int, required=False)
-)
-def proposal_comment_edit_post(pid, text, cid):
-    if current_user.is_anonymous:
-        flash('not logged in', 'error')
-        return redirect(url_for('proposal', pid=pid))
-    if len(text) <= 3:
-        flash('comment too short', 'error')
-        return redirect(url_for('proposal', pid=pid))
-    try:
-        Comment.edit(user_id=current_user.id, message=text, pid=pid, cid=cid)
-    except Exception as ex:
-        flash('Could not edit comment: %s' % str(ex), 'error')
-        return redirect(url_for('proposal', pid=pid))
-
-    flash('Comment updated.')
-    return redirect(url_for('proposal', pid=pid))
-
-@app.route('/proposal/<int:onpid>/remove-comment/<int:removecID>/<int:puid>')
-def proposal_comment_remove(removecID, onpid, puid):
-    if current_user.is_anonymous:
-        flash('not logged in', 'error')
-        return redirect(url_for('proposal', pid=onpid))
-    try:
-        Comment.remove(cid=removecID, pid=onpid, puid=puid)
-    except Exception as ex:
-        flash('Could not remove comment: %s' % str(ex), 'error')
-        return redirect(url_for('proposal', pid=onpid))
-    flash('Comment removed')
-    return redirect(url_for('proposal', pid=onpid))
-
-@app.route('/proposal/<int:pid>/comment-edit/<int:cid>')
-def proposal_comment_edit(cid, pid):
-    from funding.orm.orm import Comment
-    c = Comment.find_by_id(cid)
-    if c.locked:
-        raise Exception('comment is locked, cannot edit or delete')
-    p = Proposal.find_by_id(pid)
-    if not p:
-        return redirect(url_for('proposals'))
-    if c.proposal_id != p.id:
-        return redirect(url_for('proposals'))
-
-    return make_response(render_template('comment_edit.html', c=c, pid=pid, cid=cid))
 
 @app.route('/proposal/<int:pid>')
 def proposal(pid):
     p = Proposal.find_by_id(pid=pid)
-    p.get_comments()
     if not p:
         return make_response(redirect(url_for('proposals')))
+    p.get_comments()
     return make_response(render_template(('proposal/proposal.html'), proposal=p))
 
 
@@ -213,48 +148,62 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             msg = "Moved to status \"%s\"." % settings.FUNDING_STATUSES[status].capitalize()
             try:
                 Comment.add_comment(user_id=current_user.id, message=msg, pid=pid, automated=True)
-                if not p.generated_qr:
-                    Proposal.generate_donation_addr_qr(donation_addr=p.addr_donation, pid=pid)
             except:
                 pass
 
         p.status = status
         p.last_edited = datetime.now()
-
     else:
         try: 
             funds_target = float(funds_target) 
         except Exception as ex:
             return make_response(jsonify('letters detected'),500)
         if funds_target < 1:
-                return make_response(jsonify('Proposal asking less than 1 error :)'), 500)
-        if len(addr_receiving) != 97:
-            return make_response(jsonify('Faulty address, should be of length 72'), 500)
+            return make_response(jsonify('Proposal asking less than 1 error :)'), 500)
+        if len(addr_receiving) not in settings.COIN_ADDRESS_LENGTH:
+            return make_response(jsonify(f'Faulty address, should be of length: {" or ".join(map(str, settings.COIN_ADDRESS_LENGTH))}'), 500)
 
         p = Proposal(headline=title, content=content, category='misc', user=current_user)
-        proposalID = current_user
-        addr_donation = Proposal.generate_proposal_subaccount(proposalID)
-        p.addr_donation = addr_donation  
         p.html = html
         p.last_edited = datetime.now()
         p.funds_target = funds_target
         p.addr_receiving = addr_receiving
         p.category = category
         p.status = status
-        db_session.add(p)
-    
-    db_session.commit()
-    db_session.flush()
 
-    if p.addr_donation:
-        donation_addr = p.addr_donation
-        Proposal.generate_donation_addr_qr(donation_addr, p.id)
-    else:
-        return
+        # generate integrated address
+        try:
+            headers_dict = {
+                'X-API-KEY': settings.RPC_HEADER,
+                'Content-Type': 'application/json'
+            }
+            # get primary address
+            r = requests.get(settings.RPC_LOCATION + "/addresses/primary", headers=headers_dict)
+            r.raise_for_status()
+            blob = r.json()
+            assert 'address' in blob
+            main_address = blob['address']
+            paymentID = secrets.token_hex(32) 
 
-    # reset cached statistics
-    from funding.bin.utils import Summary
-    Summary.fetch_stats(purge=True)
+            r = requests.get(settings.RPC_LOCATION + f"/addresses/{main_address}/{paymentID}", headers=headers_dict)
+            r.raise_for_status()
+            blob = r.json()
+
+            assert 'integratedAddress' in blob
+            assert len(blob['integratedAddress']) == 186
+        except Exception as ex:
+            raise
+
+        p.addr_donation = blob['integratedAddress']
+        p.payment_id = paymentID
+
+        db.session.add(p)
+
+    db.session.commit()
+    db.session.flush()
+
+    # reset cached stuffz
+    cache.delete('funding_stats')
 
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
 
@@ -265,7 +214,7 @@ def proposal_edit(pid):
     if not p:
         return make_response(redirect(url_for('proposals')))
 
-    return make_response(render_template(('proposal/edit.html'), proposal=p))
+    return make_response(render_template('proposal/edit.html', proposal=p))
 
 
 @app.route('/search')
@@ -281,10 +230,11 @@ def search(key=None):
 
 @app.route('/user/<path:name>')
 def user(name):
-    q = db_session.query(User)
+    q = db.session.query(User)
     q = q.filter(User.username == name)
     user = q.first()
     return render_template('user.html', user=user)
+
 
 @app.route('/proposals')
 @endpoint.api(
@@ -312,6 +262,45 @@ def proposals(status, page, cat):
     return make_response(render_template('proposal/proposals.html',
                                          proposals=proposals, status=status, cat=cat))
 
+
+@app.route('/donate')
+def donate():
+    data_default = {'sum': 0, 'txs': []}
+    cache_key = 'devfund_txs_in'
+    data = cache.get(cache_key)
+    track_txs = []
+    sum_amount = 0.0
+    if not data:
+        try:
+            headers_dict = {
+                'X-API-KEY': settings.RPC_HEADER_DEVFUND,
+                'Content-Type': 'application/json'
+            }
+            r = requests.get(settings.RPC_LOCATION_DEVFUND + "/transactions", headers=headers_dict)
+            r.raise_for_status()
+            blob = r.json()
+            assert 'transactions' in blob
+            assert isinstance(blob['transactions'], list)
+            txs = blob['transactions']
+            for tx in txs:
+                if 5 < tx['unlockTime'] - tx['blockHeight'] < 500000000 and len(tx['transfers']) > 0 and tx['transfers'][0]['amount'] > 0:
+                    track_txs.append({'amount_human': float(tx['transfers'][0]['amount'])/1e2, 'txid': tx['hash'], 'type': 'in', 'datetime': datetime.fromtimestamp(tx['timestamp'])})
+                    sum_amount += float(tx['transfers'][0]['amount'])/1e2
+            print(track_txs)
+        except Exception as ex:
+            return "devfund page error"
+        if len(track_txs) == 0:
+            cache.set(cache_key, data_default, 15)
+        else:
+            txs_in = track_txs[:50]
+            txs_in_list = {'txs': txs_in, 'sum': sum_amount}
+            cache.set(cache_key, txs_in_list, 15)
+    else:
+        txs_in = data
+
+    return make_response(render_template('donate.html', txs_in=txs_in_list))
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if settings.USER_REG_DISABLED:
@@ -327,18 +316,99 @@ def register():
     try:
         user = User.add(username, password, email)
         flash('Successfully registered. No confirmation email required. You can login!')
+        cache.delete('funding_stats')  # reset cached stuffz
         return redirect(url_for('login'))
     except Exception as ex:
         flash('Could not register user. Probably a duplicate username or email that already exists.', 'error')
         return make_response(render_template('register.html'))
 
 
+if settings.OPENID_ENABLED:
+    @app.route("/fund-auth/")
+    def wow_auth():
+        assert "state" in request.args
+        assert "session_state" in request.args
+        assert "code" in request.args
+
+        # verify state
+        if not session.get('auth_state'):
+            return "session error", 500
+        if request.args['state'] != session['auth_state']:
+            return "attack detected :)", 500
+
+        # with this authorization code we can fetch an access token
+        url = f"{settings.OPENID_URL}/token"
+        data = {
+            "grant_type": "authorization_code",
+            "code": request.args["code"],
+            "redirect_uri": settings.OPENID_REDIRECT_URI,
+            "client_id": settings.OPENID_CLIENT_ID,
+            "client_secret": settings.OPENID_CLIENT_SECRET,
+            "state": request.args['state']
+        }
+        try:
+            resp = requests.post(url, data=data)
+            resp.raise_for_status()
+        except:
+            return "something went wrong :( #1", 500
+
+        data = resp.json()
+        assert "access_token" in data
+        access_token = data['access_token']
+
+        # fetch user information with the access token
+        url = f"{settings.OPENID_URL}/userinfo"
+
+        try:
+            resp = requests.post(url, headers={"Authorization": f"Bearer {access_token}"})
+            resp.raise_for_status()
+            user_profile = resp.json()
+        except:
+            return "something went wrong :( #2", 500
+
+        username = user_profile.get("preferred_username")
+        sub = user_profile.get("sub")
+        if not username:
+            return "something went wrong :( #3", 500
+
+        sub_uuid = uuid.UUID(sub)
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if not user.uuid:
+                user.uuid = sub_uuid
+                db.session.commit()
+                db.session.flush()
+        else:
+            user = User.add(username=username,
+                            password=None, email=None, uuid=sub_uuid)
+        login_user(user)
+        response = redirect(request.args.get('next') or url_for('index'))
+        response.headers['X-Set-Cookie'] = True
+        return response
+
+
 @app.route('/login', methods=['GET', 'POST'])
 @endpoint.api(
-    parameter('username', type=str, location='form'),
-    parameter('password', type=str, location='form')
+    parameter('username', type=str, location='form', required=False),
+    parameter('password', type=str, location='form', required=False)
 )
 def login(username, password):
+    if settings.OPENID_ENABLED:
+        state = uuid.uuid4().hex
+        session['auth_state'] = state
+
+        url = f"{settings.OPENID_URL}/auth?" \
+              f"client_id={settings.OPENID_CLIENT_ID}&" \
+              f"redirect_uri={settings.OPENID_REDIRECT_URI}&" \
+              f"response_type=code&" \
+              f"state={state}"
+
+        return redirect(url)
+
+    if not username or not password:
+        flash('Enter username/password pl0x')
+        return make_response(render_template('login.html'))
+
     if request.method == 'GET':
         return make_response(render_template('login.html'))
 
@@ -359,69 +429,9 @@ def logout():
     logout_user()
     response = redirect(request.args.get('next') or url_for('login'))
     response.headers['X-Set-Cookie'] = True
-    flash('Logout successfully')
     return response
 
 
 @app.route('/static/<path:path>')
 def static_route(path):
     return send_from_directory('static', path)
-
-#password reset
-@app.route('/account/password/reset', methods=['GET', 'POST'])
-@endpoint.api(
-    parameter('email', type=str, location='form')
-)
-
-def passResetStart(email):
-    if request.method == 'GET':
-        return make_response(render_template('reset.html'))
-
-    xquery = db_session.query(User)
-    searchQ = xquery.filter_by(email=email).first()
-    if searchQ is None:
-        return
-    else: 
-        key = URLSafeTimedSerializer(settings.SECRET,salt='passwordreset')
-        token = key.dumps({'email': searchQ.email})
-        msg = Message("Password Reset Request",
-        sender="settings.USER_EMAIL_SENDER_EMAIL",
-        recipients=[email])
-        msg.body = "Hi, we received a request to reset your password on the {coincode} Funding System ({siteurl}).\n\n Please click this link to reset your password: {siteurl}account/password/reset/{token}".format(siteurl=settings.SITE_URL,coincode=settings.COINCODE, token=token)
-        flash('Password reset email sent')
-        mail.send(msg)
-
-    return make_response(render_template('reset.html'))
-
-@app.route('/account/password/reset/<token>', methods=['GET', 'POST'])
-@endpoint.api(
-    parameter('password', type=str, location='form')
-)
-def passwordReset(token, password, max_age=1200):
-    s = URLSafeTimedSerializer(settings.SECRET, salt='passwordreset')
-    try: 
-        values = s.loads(token, max_age=max_age)
-    except SignatureExpired:
-        flash('Reset password URL link is too old.')
-        return redirect(url_for('login'))
-    except BadData as e:
-        print('Bad login token "{}"', token)
-        return redirect(url_for('login'))
-    except SignatureExpired:
-        return None
-
-    userEmail = values['email']
-    if (password):
-        try:
-            User.edit(email=userEmail, password=password)
-            if (current_user.is_authenticated):
-                flash('Password was changed.')
-                return redirect(url_for('user', name=current_user))
-            else:
-                flash('Password was changed. You may log in now.')
-                return redirect(url_for('login'))
-        except Exception as ex:
-            flash('Could not change password: %s' % str(ex), 'error')
-
-    else:
-        return make_response(render_template('password.html'))
