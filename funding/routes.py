@@ -284,7 +284,7 @@ def donate():
             txs = blob['transactions']
             for tx in txs:
                 if 5 < tx['unlockTime'] - tx['blockHeight'] < 500000000 and len(tx['transfers']) > 0 and tx['transfers'][0]['amount'] > 0:
-                    track_txs.append({'amount_human': float(tx['transfers'][0]['amount'])/1e2, 'txid': tx['hash'], 'type': 'in', 'datetime': datetime.fromtimestamp(tx['timestamp'])})
+                    track_txs.append({'amount_human': float(tx['transfers'][0]['amount'])/1e2, 'txid': tx['hash'], 'type': 'in', 'block_height': tx['blockHeight'], 'datetime': datetime.fromtimestamp(tx['timestamp'])})
                     sum_amount += float(tx['transfers'][0]['amount'])/1e2
             print(track_txs)
         except Exception as ex:
