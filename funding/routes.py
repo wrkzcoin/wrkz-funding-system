@@ -13,6 +13,7 @@ from funding.orm import Proposal, User, Comment
 
 import secrets
 import json
+import traceback
 
 @app.route('/')
 def index():
@@ -48,6 +49,8 @@ def proposal_add():
     parameter('text', type=str, required=True),
     parameter('cid', type=int, required=False)
 )
+
+
 def proposal_comment(pid, text, cid):
     if current_user.is_anonymous:
         flash('not logged in', 'error')
@@ -150,7 +153,6 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
                 Comment.add_comment(user_id=current_user.id, message=msg, pid=pid, automated=True)
             except:
                 pass
-
         p.status = status
         p.last_edited = datetime.now()
     else:
@@ -193,6 +195,11 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             assert len(blob['integratedAddress']) == 186
         except Exception as ex:
             raise
+        # post discord
+        try:
+            settings.post_discord(f'A new proposal created: ```{title}```.')
+        except Exception as ex:
+            traceback.print_exc(file=sys.stdout)
 
         p.addr_donation = blob['integratedAddress']
         p.payment_id = paymentID
@@ -201,7 +208,6 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
 
     db.session.commit()
     db.session.flush()
-
     # reset cached stuffz
     cache.delete('funding_stats')
 
@@ -314,6 +320,10 @@ def register():
     try:
         user = User.add(username, password, email)
         flash('Successfully registered. No confirmation email required. You can login!')
+        try:
+            settings.post_discord('A new user just registered.')
+        except Exception as ex:
+            pass
         cache.delete('funding_stats')  # reset cached stuffz
         return redirect(url_for('login'))
     except Exception as ex:

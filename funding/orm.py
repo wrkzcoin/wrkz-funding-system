@@ -13,6 +13,8 @@ from sqlalchemy_json import MutableJson
 
 import settings
 from funding.factory import db, cache
+from discord_webhook import DiscordWebhook
+import traceback
 
 base = declarative_base(name="Model")
 
@@ -449,4 +451,9 @@ class Comment(db.Model):
         except Exception as ex:
             db.session.rollback()
             raise Exception(str(ex))
+        # post discord
+        try:
+            settings.post_discord(f'A user posted a comment in Proposal ID {str(pid)}: ```{message}```')
+        except Exception as ex:
+            traceback.print_exc(file=sys.stdout)
         return comment
