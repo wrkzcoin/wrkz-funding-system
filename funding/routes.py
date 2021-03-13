@@ -296,7 +296,7 @@ def donate():
         if len(track_txs) == 0:
             cache.set(cache_key, data_default, 15)
         else:
-            txs_in = track_txs[:50]
+            txs_in = track_txs[:50][::-1]
             txs_in_list = {'txs': txs_in, 'sum': sum_amount}
             cache.set(cache_key, txs_in_list, 15)
     else:

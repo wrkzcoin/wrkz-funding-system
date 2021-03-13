@@ -236,7 +236,7 @@ class Proposal(db.Model):
 
         data = {
             'sum': sum_amount,
-            'txs': track_txs if len(track_txs) > 0 else []
+            'txs': track_txs[::-1] if len(track_txs) > 0 else []
         }
 
         if not isinstance(data, dict):
