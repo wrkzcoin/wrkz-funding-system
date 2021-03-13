@@ -197,7 +197,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             raise
         # post discord
         try:
-            settings.post_discord(f'A new proposal created: ```{title}```.')
+            settings.post_discord(f'A new proposal created: ```{title}```')
         except Exception as ex:
             traceback.print_exc(file=sys.stdout)
 

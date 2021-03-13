@@ -10,7 +10,15 @@
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
 
     <meta property="fb:app_id" content="0" />
-    <meta property="og:image" content="https://funding.wownero.com/static/wrkz-grey.png" />
+    {% if proposal %}
+        <meta property="og:image" content="https://funding.wrkz.work/api/1/qr?address={{ proposal.addr_donation }}" />
+        <meta name="twitter:card" content="summary_large_image">
+    {% elif donate %}
+        <meta property="og:image" content="https://funding.wrkz.work/api/1/qr?address=WrkzQQfNygFGD3Hhfw5TVxEYDmeBsqu8T7EURApdUChbEGoqT5rGUSCfPQFPDYw9sDCSuQcBV6fHyfjU5xipw2Tk8iGG5T3vF5" />
+        <meta name="twitter:card" content="summary_large_image">
+    {% else %}
+        <meta property="og:image" content="https://funding.wrkz.work/static/wrkz-grey.png" />
+    {% endif %}
     <meta property="og:description" content="The WrkzCoin Funding system" />
     <meta property="og:url" content="https://funding.wrkz.work/" />
     <meta property="og:title" content="WRKZ Funding System" />
