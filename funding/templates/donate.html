@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container page_devfund">
+    <div class="row">
+        <div class="col-lg-9">
+            <h2>Development Fund</h2>
+            <p>
+                Developer donation address/slush fund (mostly reserved for hookers and blow).
+            </p>
+        </div>
+    </div>
+    <div class="row content">
+        <div class="col-lg-9">
+            <hr>
+            <h3>Donating WRKZ</h3>
+            <p>
+                Donations may be send to: <code style="word-wrap: break-word">WrkzQQfNygFGD3Hhfw5TVxEYDmeBsqu8T7EURApdUChbEGoqT5rGUSCfPQFPDYw9sDCSuQcBV6fHyfjU5xipw2Tk8iGG5T3vF5</code>
+            </p>
+            <img style="margin-bottom:20px;" src="/api/1/qr?address=WrkzQQfNygFGD3Hhfw5TVxEYDmeBsqu8T7EURApdUChbEGoqT5rGUSCfPQFPDYw9sDCSuQcBV6fHyfjU5xipw2Tk8iGG5T3vF5"/>
+
+            <h3>View-only wallet</h3>
+            <p>
+                <code style="word-wrap: break-word">(Not yet here)</code>
+            </p>
+            <h3>Balance</h3>
+            <p>
+                Current balance: <code>{{ txs_in['sum']|round(4) }} WRKZ</code>
+            </p>
+            <p>
+                50 most recent donations:
+            </p>
+            {% from 'proposal/macros/transaction.html' import tx_item %}
+
+            <ul class="list-group">
+                {% for tx in txs_in['txs'] %}
+                    {{ tx_item(tx) }}
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% include 'sidebar.html' %}
+
+    </div>
+
+    <br>
+
+</div>
+<!-- /.container -->
+{% endblock %}

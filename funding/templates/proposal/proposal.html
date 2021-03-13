@@ -27,7 +27,7 @@
                 {% elif proposal.status == 2 %}
                     Seeking funding
                 {% elif proposal.status == 3 %}
-                    Work in Progress
+                    WIP / Help needed
                 {% elif proposal.status == 4 %}
                     Completed
                 {% endif %}
@@ -35,7 +35,7 @@
                 {% if proposal.status <= 1 %}
                 <br>
                 <span>
-                    Target: <b>{{proposal.funds_target|round}}</b> {{ coincode }}
+                    Target: <b>{{proposal.funds_target|round}}</b> WRKZ
                      {% if proposal.funds_target_usd %}
                     <small>➞ {{proposal.funds_target_usd}} USD</small>
                     {% endif %}
@@ -51,12 +51,11 @@
                 {% endif %}
             </p>
 
-            <hr>
-            {% if proposal.status >= 2 %}
+            {% if proposal.status in [2,3] %}
             <div class="row">
                 <div class="col-md-12">
                     <div class="card my-4">
-                        <h5 class="card-header">Funds</h5>
+                        <h5 class="card-header">Proposal</h5>
                         <div class="card-body">
                             <div class="row the-bar">
                                 <div class="col-lg-4">
@@ -65,7 +64,7 @@
                                             <tr>
                                                 <td>Target</td>
                                                 <td>
-                                                    <span class="badge">{{proposal.funds_target|round}} {{ coincode }}
+                                                    <span class="badge">{{proposal.funds_target|round}} WRKZ
                                                      {% if proposal.funds_target_usd %}
                                                     <small>➞ {{proposal.funds_target_usd}} USD</small>
                                                     {% endif %}
@@ -74,14 +73,7 @@
                                             </tr>
                                             <tr>
                                                 <td>Funded</td>
-                                                <td><span class="badge">
-                                                    {% if proposal.balance['pct'] %}
-                                                        {{proposal.balance['pct'] | round or 0}}
-                                                    {% else %} 
-                                                        0
-                                                    {% endif %}%
-                                                    </span>
-                                                </td>
+                                                <td><span class="badge">{{proposal.balance['pct'] | round or 0}} %</span></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -89,13 +81,11 @@
                             </div>
                             <div class="row">
                                 <div class="col-lg-8">
+                                    {{proposal.balance['txs'] | length}} individual contributions
                                     {% if proposal.balance['txs'] %}
-                                        {{proposal.balance['txs'] | length}} individual contributions
                                     <small>
                                         <a style="margin:4px;" href="#incoming_txs">Details...</a>
                                     </small>
-                                    {% else %}
-                                    0 contributions
                                     {% endif %}
                                     <div class="progress">
                                         <div class="progress-bar progress-monero progress-bar-striped" style="width: 100.0%;">
@@ -104,72 +94,56 @@
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {% if proposal.balance['available'] %}
-                                        {{proposal.balance['available']|round(3) or 0 }} {{ coincode }} Raised 
-                                        {% if (proposal.funds_target-proposal.balance['available']|float|round(3)) > 0 %} 
-                                            ({{ (proposal.funds_target-proposal.balance['available']|float|round(3)|int) }} {{ coincode }} until goal)
-                                            {% else %} 
-                                            ({{ (proposal.balance['available']-proposal.funds_target)|round(3) }} {{ coincode }} past goal!)
-                                        {% endif %}
-                                    {% else%} 
-                                    0 {{ coincode }} Raised 
+                                    {{proposal.balance['available']|round(3) or 0 }} WRKZ Raised
+                                    {% set remaining = proposal.funds_target - proposal.balance['available']|float|round(3) %}
+
+                                    <small>
+                                    {% if remaining > 0 %}
+                                        ({{ (proposal.funds_target - proposal.balance['available']|float|round(3)|int) }} WRKZ until goal)
+                                    {% elif remaining < 0 %}
+                                        ({{ (proposal.balance['available']-proposal.funds_target|float|round(3)|int) }} WRKZ past goal!)
                                     {% endif %}
+                                    </small>
+
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['pct']}}%;">
-                                        </div> 
+                                        </div>
                                     </div>
                                     <hr>
                                 </div>
                                 <br/>
-                                
+
                                 <br/>
                                 <div class="col-lg-8">
-                                    {% if proposal.spends['spent'] %}
-                                        {{proposal.spends['spent']|round(3) or 0}} {{ coincode }} Paid out ({{proposal.spends['fees']}} in fees)
-                                    {% else %}
-                                        0 {{ coincode }} Paid Out 
-                                    {% endif %}
+                                    {{ proposal.spends['amount'] }} WRKZ Paid out <small>({{ proposal.spends['pct']|round(1) }}%)</small>
                                     <div class="progress">
-                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['spent_remaining_pct']}}%;">
+                                        <!-- @todo: spends remaining pct -->
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{ proposal.spends['pct'] }}%;">
                                         </div>
                                     </div>
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {% if proposal.balance['available'] %}
-                                        {{((proposal.balance['available']-proposal.spends['spent'])-proposal.spends['fees']) |round(3) or 0}} {{ coincode }} Available to Payout
-
-
-                                    {% else %} 
-                                    0 Avail
-                                    {% endif %}
+                                    {{ (proposal.balance['available']-proposal.spends['amount']) |round(3) or 0}} WRKZ Available for payout :-)
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
                                         </div>
                                     </div>
-                                    <hr>
                                 </div>
 
                                 <br/>
                             </div>
-                            <div class="row" style="margin-top:16px;">
+                            <div class="row" style="margin-top:32px;">
                                 <div class="col-lg-12">
                                     Donation address:
-                                    <pre class="proposal_address">
-                                        {% if proposal.addr_donation %}
-                                            {{ proposal.addr_donation }}
-                                        {% else %}
-                                            <small>No address generated yet</small>
-                                        {% endif %}
-                                    </pre>
-                                </div>
-                                <div class="col-lg-12">
-                                    QR Code:<br/>
-                                    <span class="qr_code">
-                                        <img src="/static/qr/{{ proposal.addr_donation }}.png" style="width:256px;"/>
-                                    </span>
+                                    <pre class="proposal_address">{% if proposal.addr_donation %}{{ proposal.addr_donation }}{% else %}<small>None generated yet</small>{% endif %}</pre>
                                 </div>
 
+                                {% if proposal.addr_donation %}
+                                <div class="col-lg-12">
+                                    <img class="proposal_qr" src="/api/1/qr?address={{ proposal.addr_donation }}">
+                                </div>
+                                {%  endif %}
                             </div>
                         </div>
                     </div>
@@ -194,12 +168,7 @@
 
     {% include 'comments.html' %}
 
-    <style>
-        #incoming_txs li.list-group-item {
-            padding-top: 4px;
-            padding-bottom: 4px;
-        }
-    </style>
+    {% from 'proposal/macros/transaction.html' import tx_item %}
 
     {% if proposal.balance['txs'] %}
     <div class="row">
@@ -209,20 +178,7 @@
                 <div class="card-body">
                     <ul class="list-group">
                         {% for tx in proposal.balance['txs'] %}
-                        <li class="list-group-item">
-                            {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
-                            <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
-                            <br>
-                            <a target="_blank" href="https://aeonblocks.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
-                            <span style="float:right;color:#008926;font-weight:bold;">
-                                + {{tx['amount_human']|round(3)}} {{ coincode }}
-                                {% if 'amount_usd' in tx %}
-                                <small style="color: black">
-                                    ➞ $ {{tx['amount_usd']}}
-                                </small>
-                                {% endif %}
-                            </span>
-                        </li>
+                            {{ tx_item(tx) }}
                         {% endfor %}
                     </ul>
                 </div>
@@ -232,38 +188,21 @@
     <!-- /.row -->
     {% endif %}
 
-
-{% if proposal.spends['txs'] %}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card my-6" id="incoming_txs">
-                <h5 class="card-header">Outgoing transactions <small>({{proposal.spends['txs']|length}})</small></h5>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for tx in proposal.spends['txs'] %}
-                        <li class="list-group-item">
-                            {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
-                            <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
-                            <br>
-                            <a target="_blank" href="https://aeonblocks.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
-                            <span style="float:right;color:#890000;font-weight:bold;">
-                                - {{tx['amount_human']|round(3)}} {{ coincode }}
-
-                                {% if 'amount_usd' in tx %}
-                                <small style="color: black">
-                                    ➞ $ {{tx['amount_usd']}}
-                                </small>
-                                {% endif %}
-                                <br/><span style="float:right; color: #1230f0;">tx fee: {{ tx['fee_human']|round(10) }}</span>
-                            </span>
-                           
-                        </li>
-                        {% endfor %}
-                    </ul>
+    {% if proposal.payouts %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card my-6" id="incoming_txs">
+                    <h5 class="card-header">Outgoing transactions</h5>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for payout in proposal.payouts %}
+                                {{ tx_item(payout.as_tx) }}
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     <!-- /.row -->
     {% endif %}
 
@@ -281,7 +220,6 @@
             </div>
         </div>
     </div>
- 
 </div>
 
 <script>
@@ -290,7 +228,7 @@
         let regexp_address = /(W[o|W][a-zA-Z0-9]{95})/g;
         let regexp_imgur = /(https:\/\/i.imgur.com\/[a-zA-Z0-9]{0,7}.[jpg|png|gif|webm]+)/g;
         let regexp_imgflip = /(https:\/\/i.imgflip.com\/[a-zA-Z0-9]{0,7}.[jpg|png|gif|webm]+)/g;
-        let truncated_addy = function(obj){ return `<span data-addy="${obj}" class="wow_addy">${obj.substring(0, 4)}...${obj.slice(-4)}</span>`; }
+        let truncated_addy = function(obj){ return `<span data-addy="${obj}" class="wrkz_addy">${obj.substring(0, 8)}...${obj.slice(-8)}</span>`; }
 
         function rich_addy(obj) {
             // richtext addy's
@@ -308,9 +246,6 @@
             // convert images to <img>
             let html = obj.html();
             let uid = obj.attr('data-id');
-            if(uid == 30){
-                debugger;
-            }
 
             var matches = html.match(regexp_imgur) || [];
             matches = matches.concat(html.match(regexp_imgflip));
@@ -318,13 +253,13 @@
                 matches.filter(function (value, index, self) {
                     return self.indexOf(value) === index && typeof value === 'string';
                 }).forEach(function (obj) {
-                    html = html.replace(new RegExp(obj, 'g'), `<br><img src="${obj}"/></a><br>`)
+                    html = html.replace(new RegExp(obj, 'g'), `<img src="${obj}"/></a>`)
                 });
             }
             obj.html(html);
         }
 
-        $(document).on('click', '.wow_addy', function(event){
+        $(document).on('click', '.wrkz_addy', function(event){
             let obj = $(this);
             if(obj.attr('data-active') === "true"){
                 //obj.attr('data-active', 'false');

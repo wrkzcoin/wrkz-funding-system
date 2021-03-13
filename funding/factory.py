@@ -1,43 +1,76 @@
 # -*- coding: utf-8 -*-
 import settings
-from werkzeug.contrib.fixers import ProxyFix
 from flask import Flask
-import sys
+from flask_caching import Cache
+from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.middleware.proxy_fix import ProxyFix
+import redis
 
 app = None
-sentry = None
 cache = None
-db_session = None
+db = None
 bcrypt = None
-mail = None
+
+
+def _setup_cache(app: Flask):
+    global cache
+
+    cache_config = {
+        "CACHE_TYPE": "redis",
+        "CACHE_DEFAULT_TIMEOUT": 60,
+        "CACHE_KEY_PREFIX": "fundingwrkz_cache_",
+        "CACHE_REDIS_PORT": settings.REDIS_PORT
+    }
+
+    if settings.REDIS_PASSWD:
+        cache_config["CACHE_REDIS_PASSWORD"] = settings.REDIS_PASSWD
+
+    app.config.from_mapping(cache_config)
+    cache = Cache(app)
+
+
+def _setup_session(app: Flask):
+    app.config['SESSION_TYPE'] = 'redis'
+    app.config['SESSION_COOKIE_NAME'] = 'bar'
+    app.config['SESSION_REDIS'] = redis.from_url(settings.REDIS_URI)
+    Session(app)  # defaults to timedelta(days=31)
+
+
+def _setup_db(app: Flask):
+    global db
+    uri = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(
+        user=settings.PSQL_USER,
+        pw=settings.PSQL_PASS,
+        url=settings.PSQL_HOST,
+        db=settings.PSQL_DB)
+    app.config['SQLALCHEMY_DATABASE_URI'] = uri
+    db = SQLAlchemy(app)
+    import funding.orm
+    db.create_all()
+
 
 def create_app():
     global app
-    global db_session
-    global sentry
+    global db
     global cache
     global bcrypt
-    global mail
 
-    from funding.orm.connect import create_session
-    db_session = create_session()
-
-    app = Flask(__name__)
-    app.wsgi_app = ProxyFix(app.wsgi_app)
+    app = Flask(import_name=__name__,
+                static_folder='static',
+                template_folder='templates')
     app.config.from_object(settings)
     app.config['PERMANENT_SESSION_LIFETIME'] = 2678400
     app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 30
     app.secret_key = settings.SECRET
 
-    from flask_mail import Mail
-    mail = Mail(app)
-    app.config["MAIL_SERVER"] = settings.MAIL_SERVER
-    app.config["MAIL_PORT"] = settings.MAIL_PORT
-    app.config["MAIL_USE_SSL"] = True
-    app.config["MAIL_USERNAME"] = settings.MAIL_USERNAME
-    app.config["MAIL_PASSWORD"] = settings.MAIL_PASSWORD
-    
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+    _setup_cache(app)
+    _setup_session(app)
+    _setup_db(app)
+
     # flask-login
     from flask_login import LoginManager
     login_manager = LoginManager()
@@ -49,17 +82,13 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(_id):
-        from funding.orm.orm import User
+        from funding.orm import User
         return User.query.get(int(_id))
-
-    # session init
-    from funding.cache import JsonRedis, Cache
-    app.session_interface = JsonRedis(key_prefix=app.config['SESSION_PREFIX'], use_signer=False)
-    cache = Cache()
 
     # import routes
     from funding import routes
     from funding import api
     from funding.bin import utils_request
 
+    app.app_context().push()
     return app

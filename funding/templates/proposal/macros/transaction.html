@@ -1,0 +1,42 @@
+{% macro tx_item(tx) %}
+<li class="list-group-item tx_item">
+    <span class="height">
+        <b>Blockheight</b>:
+        {% if tx['type'] == 'pool' %}
+          soon^tm
+        {% elif tx['type'] == 'out' %}
+          <small>hidden</small>
+        {% else %}
+        {{tx['block_height']}}
+        {% endif %}
+    </span>
+    <br>
+
+    {% if tx['type'] in ['in', 'pool'] %}
+    <a target="_blank" href="https://myexplorer.wrkz.work/transaction.html?hash={{tx['txid']}}">{{tx['txid'][:32]}}...</a>
+    {% else %}
+      {% set lulz = [
+        'vodka', 'hookers', 'booze', 'strippers', 'new lambo',
+        'new ferrari', 'new villa', 'new vacation home', 'new tesla',
+        'new watch', 'new home cinema set', 'throphy wife', 'drugs']
+      %}
+      <a style="font-size:11px;" href="#">Sent to author. Enjoy the {{ lulz|random }}!</a>
+    {% endif %}
+
+    <span class="amount{% if tx['type'] in ['pool', 'in'] %} in{% endif %}">
+        {% if tx['type'] in ['in', 'pool'] %}
+            +
+        {% else %}
+            -
+        {% endif %}
+
+        {{tx['amount_human']|round(3)}} WRKZ
+
+        {% if 'amount_usd' in tx %}
+        <small style="color: black">
+            ➞ $ {{tx['amount_usd']}}
+        </small>
+        {% endif %}
+    </span>
+</li>
+{% endmacro %}

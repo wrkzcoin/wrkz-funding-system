@@ -3,32 +3,18 @@
 
 <div class="container api_documentation">
     <div class="row" style="margin-bottom:4px;">
-        <div class="col-lg-8">
-            <h3>API documentation</h3>
+        <div class="col-lg-9">
+            <h2>API documentation</h2>
+            <hr>
             <p>
                 Requests are made using standard HTTP and responses are returned in JSON format.
             </p>
             <p>
                 <ul>
-                    <li><a href="#api_convert_wow_usd">/api/1/convert/aeon-usd</a></li>
                     <li><a href="#api_proposals">/api/1/proposals</a></li>
                 </ul>
             </p>
             <br>
-
-            <div class="api_container" id="api_convert_wow_usd">
-                <h5><small>GET</small> <code>/api/1/convert/aeon-usd</code></h5>
-                <hr>
-                <p>
-                    AEON to USD conversion. Data is pulled from Bittrex.com and CoinMarketCap.com
-                </p>
-
-                <b>Example:</b>
-                <pre>curl -vvX GET 'https://aeonfunding.com/api/1/convert/aeon-usd?amount=1000'</pre>
-
-                <b>Response:</b>
-                <pre>{"usd": 729.82}</pre>
-            </div>
 
             <div class="api_container" id="api_proposals">
                 <h5><small>GET</small> <code>/api/1/proposals</code></h5>
@@ -45,35 +31,45 @@
                 </ul>
 
                 <b>Example:</b>
-                <pre>curl -vvX GET 'https://aeonfunding.com/api/1/proposals?offset=0&limit=1&status=2'</pre>
+                <pre>curl -vvX GET 'https://funding.wrkz.work/api/1/proposals?offset=0&limit=1&status=2'</pre>
 
                 <b>Response:</b>
                 <pre>{
-   {
   "data": [
     {
-      "addr_donation": "XnYwVf3coXSCvQAjzzTKJEeMWxzCMUbzQbA3kZsqPoieR1xYW7RxbLjjLGmZLDwXc6hsNGDwWeyMTDxNL8AYHVjH1WCD8dmHy", 
-      "category": "marketing", 
-      "content_markdown": "elite cam = good cam! :D \nwords left to go = 20\nso many more to go.\nwatch that word counter go up !", 
-      "date_posted": "Aug 28 2018 02:46:05", 
-      "date_posted_epoch": "1535424365", 
-      "funded_pct": 0.0, 
-      "funds_target": 1.0, 
-      "headline": "cam fixed the funds_target issue", 
-      "id": 19, 
+      "addr_donation": "WrkzRsubcvfARzXrhHCe5bAbhbsjKngkGHFvynReev82AZqVvQjomepHbbLG4mGDFe9vtYQT1ij3Y9mE4J2QbUoE9ZbfffqKBxVF37wcZw9gX74CXqFVfeBHYENZy74Ebf4hFJn3quVSWL1KSPPoLLWZr9ZePQXFS9hWuDboQKBU2XLnAVJdEEfnfU", 
+      "category": "core", 
+      "content_markdown": "#### Why?\n\nWhat problem(s) are you trying to solve?\n\n#### How much?\n\nWhat is the total cost in ? List expenses per item. Total hours of work and per hour rate. What exchange rates are you using?\n\n#### What?\n\nDescribe your idea in detail.\n\n#### Milestones?\n\nBreak down tasks into different stages. Each stage should have the estimated number of days/weeks needed and cost per stage.\n\n#### Outcomes?\n\nWhat will be delivered? What goals will be reached?\n\n#### Why you?\n\nWhat skills and experience do you have?  CCCC", 
+      "date_posted": "Jan 30 2021 06:11:15", 
+      "date_posted_epoch": "1611987075", 
+      "funded_pct": 1.02, 
+      "funds_target": 1000000.0, 
+      "headline": "Test Fund 3", 
+      "id": 2, 
       "status": 2, 
-      "user": "camthegeek"
+      "user": "pluton"
     }
   ]
-}
 }</pre>
+            </div>
+
+            <div class="api_container" id="api_qr_generation">
+                <h5><small>GET</small> <code>/api/1/qr</code></h5>
+                <hr>
+                <p>
+                    WRKZ address to QR code generation. Returns 300x300 png.
+                </p>
+
+                <b>Example:</b>
+                <br>
+                <a target="_blank" href="https://funding.wrkz.work/api/1/qr?address=WrkzQQfNygFGD3Hhfw5TVxEYDmeBsqu8T7EURApdUChbEGoqT5rGUSCfPQFPDYw9sDCSuQcBV6fHyfjU5xipw2Tk8iGG5T3vF5">
+                    link
+                </a>
             </div>
         </div>
 
         {% include 'sidebar.html' %}
     </div>
-
-
 </div>
 <!-- /.container -->
 {% endblock %}

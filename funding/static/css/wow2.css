@@ -8,8 +8,8 @@ body {
     }
 }
 .center { 
-text-align: center;
-margin: 0 auto 0 auto;
+    text-align: center;
+    margin: 0 auto 0 auto;
 }
 .navbar {
     padding: .1rem 1rem;
@@ -24,10 +24,9 @@ margin: 0 auto 0 auto;
 
 .navbar .navbar-brand img#text{
     width:235px;
-    height:13px;
-    float:left;
-    margin-top: 8px;
-    margin-left:8px;
+    margin-top: -4px;
+    padding-top: 0px;
+    display: inline-block;
 }
 
 .navbar-nav .nav-link{
@@ -88,11 +87,6 @@ margin: 0 auto 0 auto;
     padding: 2px;
 }
 
-.table {
-    display: block;
-    overflow-x: auto;
-}
-
 .table td, .table th {
     padding: 0.35rem;
 }
@@ -104,8 +98,9 @@ html {
   min-height: 100%;
 }
 body {
-  /*background-image: url("https://www.aeon.cash/img/blur.png");*/
-  background: #fefefe;
+  margin-bottom: 60px; /* Margin bottom by footer height */
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
+  background-repeat: repeat;
 }
 
 .footer {
@@ -113,32 +108,23 @@ body {
     bottom: 0;
     width: 100%;
     height: 30px;
+    line-height: 30px;
+    background-color: #f5f5f5;
 }
 
 .bg-dark {
-   background: linear-gradient(90deg, #164450, #5fbcd3);
-   margin-bottom: 0;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    border-radius: 0;
-    border: none;
+    background: linear-gradient(90deg, #d253c8, #ffa93e);
 }
 
 .navbar-dark .navbar-brand {
     color: #fff;
     font-size: 18pt;
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
     text-shadow: 2px 2px #667ff952;
-}
-.logo-text { 
-    color: #FFF;
-    font-size: 26px;
-    font-weight: 700;
-    padding: 0;
-}
-
-.navbar-dark .navbar-brand-mobile:hover {
-    color: #fff !important;
-    text-decoration: none !important;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
 }
 
 .table-proposal td {
@@ -151,12 +137,12 @@ body {
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(0,0,0,.075);
+    background-color: rgba(0,0,0,.055);
 }
 
 .table th, .table td {
-    border-top: 1px solid #164450;
-    padding-top: .3rem;
+    border-top: 1px solid #00000029;
+    padding-top: .65rem;
 }
 
 .table-tilted{
@@ -181,11 +167,11 @@ body {
 }
 
 .table a{
-    color: #2c89a0;
+    color: #006400;
 }
 
 .table thead th {
-        border-bottom: 1px solid #164450 !important;
+    border-bottom: 1px solid #00000029 !important;
     border-top: none;
     font-size: 14px;
 }
@@ -205,11 +191,11 @@ body {
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
     color: #495057;
     background-color: #fff;
-    border-left-color: #164450;
+    border-left-color: #008926;
     border-left-width: 2px;
-    border-top-color: #164450;
+    border-top-color: #008926;
     border-top-width: 1px;
-    border-right-color: #164450;
+    border-right-color: #008926;
     border-right-width: 1px;
 }
 
@@ -217,7 +203,7 @@ body {
     border: 1px solid transparent;
     border-top-left-radius: .25rem;
     border-top-right-radius: .25rem;
-    border-bottom-color: #164450;
+    border-bottom-color: #008926;
 }
 
 .nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
@@ -225,11 +211,11 @@ body {
 }
 
 .nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
-    border-color: #16445030 #16445030 #164450;
+    border-color: #00892630 #00892630 #008926;
 }
 
 a {
-    color: #164450;
+    color: #008926;
 }
 
 .btn-group-toggle a{
@@ -267,7 +253,7 @@ a {
     font-size: 16px;
     margin-bottom: 0;
     background-color: rgba(0,0,0,.03);
-    background: linear-gradient(90deg, #17455129, #5bb5cc69);
+    background: linear-gradient(90deg, #d253c829, #ffa93e69);
     /*background: linear-gradient(90deg, #40d61e1f, #ffa93e69);*/
     border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;
     border-bottom: 1px solid #e6e6e6;
@@ -286,15 +272,14 @@ a {
     color: #495057;
     background-color: #fff;
     background-clip: padding-box;
-    border: 1px solid #164450;
+    border: 1px solid #008926;
 }
 .form-group { 
-margin-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 .form-group:last-of-type {
     margin-bottom:2.5rem;
 }
-
 /*fuku chrome*/
 input {
  outline:none;
@@ -308,11 +293,18 @@ outline: none;
 input[type="text"], textarea {
 outline: none;
 box-shadow:none !important;
-border: 1px solid #164450 !important;
+border: 1px solid #008926 !important;
 }
 
 .navbar-dark .navbar-nav .nav-link {
     color: white;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    font-size: 15px;
+}
+
+.navbar-nav .nav-item {
+    line-height: 20px;
 }
 
 nav .nav-link{
@@ -326,7 +318,6 @@ nav .nav-link .active{
 .proposal-info-table td{
     border-top: 0;
 }
-
 
 .proposal-info-table td span.badge{
     font-size:20px;
@@ -449,7 +440,7 @@ span.username a{
 
 .comment-container a.reply{
     margin-bottom:2px;
-    font-family: Verdana, Geneva, sans-serif;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
     font-size: 11pt;
     text-decoration: underline;
     color: black;
@@ -473,7 +464,7 @@ span.date_posted a{
 }
 
 span.username a.author{
-    color: #164450;
+    color: #008926;
     font-weight: bold;
 }
 
@@ -525,9 +516,18 @@ ul.b {
 }
 
 .sidebar .card-body{
-    padding: 1.0rem;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+    padding-top: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 14px;
+}
+
+.sidebar .card-body ul.b{
+    margin-bottom:0;
+}
+
+.card-header {
+    border-radius: 10px 0 0 !important;
 }
 
 /* cyrillic-ext */
@@ -607,13 +607,6 @@ ul.b {
     background-color: #ffffffb0;
 }
 
-.comments-panel .comment-container .media-body span.body img{
-    max-width:500px;
-    max-height:600px;
-    display: inline;
-    width: 100%;
-}
-
 .wow_addy{
     color: red;
     cursor: pointer;
@@ -624,4 +617,154 @@ ul.b {
 
 .wow_addy[data-active="true"]{
     cursor: default;
+}
+
+.proposal_qr{
+    margin-top:8px;
+    margin-bottom:8px;
+}
+
+.table-proposal tr {
+    background: #00000005;
+}
+
+.tx_item {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background: #ffffff80;
+}
+
+.tx_item .amount {
+    float:right;
+    font-weight:bold;
+    color:#890000;
+}
+
+.tx_item .amount.in {
+    color:#008926;
+}
+
+.tx_item .datetime {
+    font-size: 14px;
+    color: #999;
+}
+
+.tx_item .height b {
+    font-size:14px;
+}
+
+.container>.content h1,
+.container>.content h2,
+.container>.content h3,
+.container>.content h4{
+    margin-bottom:20px;
+}
+
+
+.comment-container .media-body span.body {
+    word-wrap: break-word;
+    display: block;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.comment-container .media-body span.body img {
+    width: 100%;
+    max-width:500px;
+    max-height:600px;
+    margin-top:10px;
+    margin-bottom:10px;
+    display: block;
+}
+
+.navbar-brand {
+    margin-top:0
+    margin-bottom:0
+    padding-top:0
+    padding-bottom:0;
+}
+
+.card h5{
+    color: #0000009e;
+    font-size: 14px;
+}
+
+.wowtable{
+    width:100%;
+    display: block;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
+}
+.wowtable .trow{
+    width: 100%;
+    height: 34px;
+    display: table;
+}
+.wowtable .trow .item{
+    float:right;
+    width:100px;
+}
+.wowtable .trow .item.one{
+    width:30%;
+    min-width: 200px;
+}
+.wowtable .trow .item.small{
+    max-width:100px;
+    text-align:right;
+}
+.wowtable .trow.header .item span {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding-top:6px;
+    display: block;
+}
+.wowtable .trow .item.comments{
+    max-width:70px;
+    text-align: center;
+}
+.wowtable .trow .item.big{
+    display: inline-block;
+    text-align: left;
+    float: left;
+    width: auto;
+    max-width: 50%;
+}
+.wowtable .trow.header .item.big span{
+    padding-left:7px;
+    padding-top:3px;
+    font-size:18px;
+    word-break: break-word;
+}
+.trow.divider{
+    height:1px;
+    background: #00000029 !important;
+}
+.wowtable .trow.body .item span {
+    font-size:14px;
+    padding-top:6px;
+    display: block;
+}
+.wowtable .trow.body .item.big a {
+    display: block;
+    padding-left: 7px;
+    color: #006400;
+    padding-top: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    word-break: break-word;
+}
+.wowtable .trow span.alignl{
+    text-align:left;
+    padding-left:7px;
+}
+
+
+@media (max-width: 990px) {
+
+.wowtable .small{
+    display:none
+}
+.wowtable .trow .item.big{
+    max-width: 88%;
+}
 }

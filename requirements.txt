@@ -1,5 +1,5 @@
-sqlalchemy==1.2.7
-flask==0.12.3
+sqlalchemy==1.3.4
+flask
 flask-yoloapi==0.1.5
 flask_session
 flask-login
@@ -9,8 +9,9 @@ gunicorn
 psycopg2
 markdown2
 requests
-itsdangerous
-flask-mail
 pyqrcode
-pillow
 pypng
+pillow-simd
+Flask-Caching
+flask-sqlalchemy
+sqlalchemy_json
