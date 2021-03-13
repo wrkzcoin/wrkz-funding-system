@@ -265,13 +265,12 @@ class Proposal(db.Model):
 
     @classmethod
     def find_by_args(cls, status: int = None, cat: str = None, limit: int = 20, offset=0):
-        if isinstance(status, int) and status not in settings.FUNDING_STATUSES.keys():
-            raise NotImplementedError('invalid status')
-        if isinstance(cat, str) and cat not in settings.FUNDING_CATEGORIES:
-            raise NotImplementedError('invalid cat')
-
         q = cls.query
-        if isinstance(status, int):
+        if status and isinstance(status, int) and status not in settings.FUNDING_STATUSES.keys():
+            raise NotImplementedError('invalid status')
+        if cat and isinstance(cat, str) and cat not in settings.FUNDING_CATEGORIES:
+            raise NotImplementedError('invalid cat')
+        if status and isinstance(status, int):
             q = q.filter(Proposal.status == status)
         if cat:
             q = q.filter(Proposal.category == cat)
